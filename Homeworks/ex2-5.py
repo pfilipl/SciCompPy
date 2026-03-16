@@ -1,14 +1,14 @@
 with open("ex2-5.txt") as file:
     S= file.read()
 
-    words = S.split()
-    print(f"Number of black characters: {sum(len(word) for word in words)}")
-    print(f"Number of words: {len(words)}")
-    print(f"The longest word: {max(words, key = len)}")
+words = S.split()
+print(f"Number of black characters: {sum(len(word) for word in words)}")
+print(f"Number of words: {len(words)}")
+print(f"The longest word: {max(words, key = len)}")
 
-    unique_words = set(words)
-    print(f"Words in lexicographic order: {sorted(unique_words, key = str.lower)}")
-    print(f"Words in length order: {sorted(unique_words, key = len)}")
+unique_words = set(words)
+print(f"Words in lexicographic order: {sorted(unique_words, key = str.lower)}")
+print(f"Words in length order: {sorted(unique_words, key = len)}")
 
 '''
 Result for 10 paragraphs of Lorem ipsum (in ex2-5.txt):
