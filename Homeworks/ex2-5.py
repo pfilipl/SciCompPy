@@ -6,7 +6,7 @@ with open("ex2-5.txt") as file:
     print(f"Number of words: {len(words)}")
     print(f"The longest word: {max(words, key = len)}")
 
-    unique_words = list(dict.fromkeys(words))
+    unique_words = set(words)
     print(f"Words in lexicographic order: {sorted(unique_words, key = str.lower)}")
     print(f"Words in length order: {sorted(unique_words, key = len)}")
 
