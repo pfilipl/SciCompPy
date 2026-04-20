@@ -12,21 +12,13 @@ class Vector:
         self.z = z
 
     def __repr__(self):
-        return f"Vector({self.x}, {self.y}, {self.z})"
+        return f"Vector({self.x!r}, {self.y!r}, {self.z!r})"
 
     def __str__(self):
         return f"({self.x:.4f}, {self.y:.4f}, {self.z:.4f})"
 
     def __eq__(self, other):
-        if all(
-            [
-                self.x == other.x,
-                self.y == other.y,
-                self.z == other.z,
-            ]
-        ):
-            return True
-        return False
+        return (self.x, self.y, self.z) == (other.x, other.y, other.z)
 
     def __ne__(self, other):
         return not self == other
@@ -52,12 +44,12 @@ class Vector:
         return self + (-other)
 
     def __mul__(self, other):
-        if isinstance(other, float | int):
-            return Vector(self.x * other, self.y * other, self.z * other)
-        elif isinstance(other, Vector):
+        if isinstance(other, Vector):
             return self.x * other.x + self.y * other.y + self.z * other.z
         else:
-            raise TypeError(f"{other} must be scalar (float | int) or Vector.")
+            return Vector(self.x * other, self.y * other, self.z * other)
+
+    __rmul__ = __mul__
 
     def cross(self, other):
         return Vector(
@@ -85,6 +77,7 @@ assert u + w == w + u
 assert w - u == Vector(3, 4, -4)
 assert u - w == -w + u
 assert w * 3 == Vector(9, 12, 0)
+assert 2 * w == Vector(6, 8, 0)
 assert v * w == 7 * math.sqrt(3)
 assert w * v == v * w
 assert w * u == 0
