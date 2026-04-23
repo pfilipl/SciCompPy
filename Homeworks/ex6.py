@@ -65,34 +65,35 @@ class Vector:
         return hash((self.x, self.y, self.z))
 
 
-# Tests:
-v = Vector(math.sqrt(3), math.sqrt(3), math.sqrt(3))
-w = Vector(3, 4, 0)
-u = Vector(0, 0, 4)
-q = Vector(0, 0, -1)
+if __name__ == "__main__":
+    # Tests:
+    v = Vector(math.sqrt(3), math.sqrt(3), math.sqrt(3))
+    w = Vector(3, 4, 0)
+    u = Vector(0, 0, 4)
+    q = Vector(0, 0, -1)
 
-assert v != w
-assert w + u == Vector(3, 4, 4)
-assert u + w == w + u
-assert w - u == Vector(3, 4, -4)
-assert u - w == -w + u
-assert w * 3 == Vector(9, 12, 0)
-assert 2 * w == Vector(6, 8, 0)
-assert v * w == 7 * math.sqrt(3)
-assert w * v == v * w
-assert w * u == 0
-assert w.cross(u) == Vector(16, -12, 0)
-assert u.cross(w) == -w.cross(u)
-assert u.cross(q) == Vector()
-assert v.length() == 3
-assert len(set([v, v, w])) == 2
+    assert v != w
+    assert w + u == Vector(3, 4, 4)
+    assert u + w == w + u
+    assert w - u == Vector(3, 4, -4)
+    assert u - w == -w + u
+    assert w * 3 == Vector(9, 12, 0)
+    assert 2 * w == Vector(6, 8, 0)
+    assert v * w == 7 * math.sqrt(3)
+    assert w * v == v * w
+    assert w * u == 0
+    assert w.cross(u) == Vector(16, -12, 0)
+    assert u.cross(w) == -w.cross(u)
+    assert u.cross(q) == Vector()
+    assert v.length() == 3
+    assert len(set([v, v, w])) == 2
 
-print(f"Representation of v is {repr(v)}.")
-print(f"Tests for v={v}, w={w}, z={u}, and q={q} passed!")
+    print(f"Representation of v is {repr(v)}.")
+    print(f"Tests for v={v}, w={w}, z={u}, and q={q} passed!")
 
-"""
-Results:
+    """
+    Results:
 
-Representation of v is Vector(1.7320508075688772, 1.7320508075688772, 1.7320508075688772).                                                                                                 
-Tests for v=(1.7321, 1.7321, 1.7321), w=(3.0000, 4.0000, 0.0000), z=(0.0000, 0.0000, 4.0000), and q=(0.0000, 0.0000, -1.0000) passed!
-"""
+    Representation of v is Vector(1.7320508075688772, 1.7320508075688772, 1.7320508075688772).                                                                                                 
+    Tests for v=(1.7321, 1.7321, 1.7321), w=(3.0000, 4.0000, 0.0000), z=(0.0000, 0.0000, 4.0000), and q=(0.0000, 0.0000, -1.0000) passed!
+    """
