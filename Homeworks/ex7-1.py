@@ -11,16 +11,16 @@ def find_axis(v1, v2):
     if v3 == v0:
         raise ValueError("The given vectors are parallel.")
 
-    return v3 * (1 / v3.length())
+    return v3.norm()
 
 
 if __name__ == "__main__":
     # Tests:
-    i = Vector(1, 0, 0)
-    j = Vector(0, 1, 0)
+    i2 = Vector(2, 0, 0)
+    j2 = Vector(0, 2, 0)
 
-    assert find_axis(i, j) == Vector(0, 0, 1)
-    assert find_axis(j, i) == -Vector(0, 0, 1)
+    assert find_axis(i2, j2) == Vector(0, 0, 1)
+    assert find_axis(j2, i2) == -Vector(0, 0, 1)
     
     u = Vector()
     v = Vector(1, 2, 3)

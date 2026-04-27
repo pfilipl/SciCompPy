@@ -51,6 +51,12 @@ class Vector:
 
     __rmul__ = __mul__
 
+    def __truediv__(self, other):
+        if isinstance(other, Vector):
+            raise ValueError("Vector / Vector is not defined.")
+        else:
+            return Vector(self.x / other, self.y / other, self.z / other)
+
     def cross(self, other):
         return Vector(
             self.y * other.z - self.z * other.y,
@@ -60,6 +66,9 @@ class Vector:
 
     def length(self):
         return math.hypot(self.x, self.y, self.z)
+
+    def norm(self):
+        return self / self.length()
 
     def __hash__(self):
         return hash((self.x, self.y, self.z))
