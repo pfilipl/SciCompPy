@@ -42,37 +42,29 @@ fig, ax = plt.subplots(1, 1)
 
 # Focus definition and computations
 f1, f2 = (-1, 0), (1, 0)
-zzz = np.empty((nx*ny))
+zz = np.empty((nx*ny))
 for idx, point in enumerate(points.transpose()):
-    zzz[idx] = simple_ellipse((point[0], point[1]), f1, f2)
+    zz[idx] = simple_ellipse((point[0], point[1]), f1, f2)
 
 # Main image
-img = ax.imshow(zzz.reshape((nx, ny)), origin="lower", cmap="viridis_r")
+img = ax.imshow(
+    zz.reshape((nx, ny)), 
+    origin="lower", 
+    cmap="viridis_r", 
+    extent=(xmin, xmax, ymin, ymax)
+    )
 
 # Additional elements
-contours = ax.contour(zzz.reshape(nx, ny), colors='k', alpha=0.5)
+contours = ax.contour(
+    zz.reshape(nx, ny), 
+    colors='k', 
+    alpha=0.5, 
+    extent=(xmin, xmax, ymin, ymax)
+    )
 ax.clabel(contours)
-ax.scatter(
-    [(f1[0]-xmin)*nx/(xmax-xmin), (f2[0]-xmin)*nx/(xmax-xmin)],
-    [(f1[1]-ymin)*ny/(ymax-ymin), (f2[1]-ymin)*ny/(ymax-ymin)], 
-    [30, 30], 'r')
-ax.axis("off")
-axx = ax.secondary_xaxis(
-    "bottom", 
-    (
-        lambda x: x*((xmax-xmin)/nx)+xmin, 
-        lambda x: (x-xmin)*nx/(xmax-xmin)
-        ),
-    )
-axy = ax.secondary_yaxis(
-    "left", 
-    (
-        lambda y: y*(ymax-ymin)/ny+ymin, 
-        lambda y: (y-ymin)*ny/(ymax-ymin)
-        ),
-    )
-axx.set_xlabel("x")
-axy.set_ylabel("y")
+ax.scatter([f1[0], f2[0]], [f1[1], f2[1]], [30, 30], 'r')
+ax.set_xlabel("x")
+ax.set_ylabel("y")
 ax.set_title("Homework 9 ex 3 simple")
 
 # Figure saving or showing
@@ -243,32 +235,24 @@ f1, f2 = np.array((-1, 0)), np.array((1, 0))
 zz = np.array(ellipse(points, f1, f2))
 
 # Main image
-img = ax.imshow(zz.reshape(nx, ny), origin="lower", cmap="viridis_r")
+img = ax.imshow(
+    zz.reshape(nx, ny), 
+    origin="lower", 
+    cmap="viridis_r", 
+    extent=(xmin, xmax, ymin, ymax)
+    )
 
 # Additional elements
-contours = ax.contour(zz.reshape(nx, ny), colors='k', alpha=0.5)
+contours = ax.contour(
+    zz.reshape(nx, ny), 
+    colors='k', 
+    alpha=0.5, 
+    extent=(xmin, xmax, ymin, ymax)
+    )
 ax.clabel(contours)
-ax.scatter(
-    [(f1[0]-xmin)*nx/(xmax-xmin), (f2[0]-xmin)*nx/(xmax-xmin)],
-    [(f1[1]-ymin)*ny/(ymax-ymin), (f2[1]-ymin)*ny/(ymax-ymin)], 
-    [30, 30], 'r')
-ax.axis("off")
-axx = ax.secondary_xaxis(
-    "bottom", 
-    (
-        lambda x: x*((xmax-xmin)/nx)+xmin, 
-        lambda x: (x-xmin)*nx/(xmax-xmin)
-        ),
-    )
-axy = ax.secondary_yaxis(
-    "left", 
-    (
-        lambda y: y*(ymax-ymin)/ny+ymin, 
-        lambda y: (y-ymin)*ny/(ymax-ymin)
-        ),
-    )
-axx.set_xlabel("x")
-axy.set_ylabel("y")
+ax.scatter([f1[0], f2[0]],[f1[1], f2[1]], [30, 30], 'r')
+ax.set_xlabel("x")
+ax.set_ylabel("y")
 ax.set_title("Homework 9 ex 3 advanced")
 
 # Figure saving or showing
