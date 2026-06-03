@@ -218,3 +218,6 @@ __marimo__/
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+
+# Folders and files
+Materials/*
