@@ -1,9 +1,26 @@
+"""
+Periodic table module for *SciCompPy project application*.
+
+It defines periodic table widget with necessary functionality.
+
+---
+Copyright (C) 2026 Filip J. Baran
+"""
+
+# --- --- IMPORTS --- --- #
+
+# --- public libraries --- #
 import sys
 import xraylib
 from PySide6 import QtWidgets, QtCore, QtGui
 
+# --- own files --- #
 import main
 
+
+# --- --- CODE --- --- #
+
+# --- Elements' symbols and names --- #
 Elements = {
     "H": "Hydrogen",
     "He": "Helium",
@@ -126,10 +143,22 @@ Elements = {
 }
 
 
+# --- classes --- #
 class PeriodicTable(QtWidgets.QWidget):
+    """
+    Periodic table widget with checkable elements' buttons,
+    element's symbol and name panel, and X-ray Fluorescence information panel.
+    """
+
     def __init__(self, parent=None):
+        """
+        Widget initialization with layout configuration.
+        """
+
         super().__init__(parent)
 
+        # --- --- layout  --- --- #
+        # --- groups and periods labels --- #
         layout = QtWidgets.QGridLayout(self)
         for group in range(1, 19):
             layout.addWidget(
@@ -156,11 +185,15 @@ class PeriodicTable(QtWidgets.QWidget):
         layout.addWidget(
             QtWidgets.QLabel("7", alignment=QtCore.Qt.AlignmentFlag.AlignCenter), 10, 0
         )
+
+        # --- elements' buttons --- #
         period = 1
         group = 1
         for element in Elements.keys():
             element_button = Element(element)
-            element_button.hover.connect(self.elementButtonHover)
+            element_button.hover.connect(
+                self.elementButtonHover
+            )  # signal-slot connecting
             layout.addWidget(element_button, period, group)
             match element:
                 case "H":
@@ -179,6 +212,7 @@ class PeriodicTable(QtWidgets.QWidget):
                 case _:
                     group += 1
 
+        # --- element's symbol and name panel --- #
         layout_element = QtWidgets.QVBoxLayout()
         layout.addLayout(layout_element, 1, 3, 3, 4)
         self.element_symbol = QtWidgets.QLabel(
@@ -196,17 +230,20 @@ class PeriodicTable(QtWidgets.QWidget):
         layout_element.addWidget(self.element_symbol)
         layout_element.addWidget(self.element_name)
 
+        # --- X-ray Fluorescence information panel --- #
         layout_labels = QtWidgets.QGridLayout()
         layout.addLayout(layout_labels, 1, 7, 3, 6)
         self.labels_KshellInfo = XRFinfo(
-            {"K": xraylib.K_SHELL}, {"Kα": xraylib.KA_LINE, "Kβ": xraylib.KB_LINE}
+            {"K": xraylib.K_SHELL},
+            {"Kα": xraylib.KA_LINE, "Kβ": xraylib.KB_LINE},
         )
         self.labels_LshellInfo = XRFinfo(
             {"L3": xraylib.L3_SHELL, "L2": xraylib.L2_SHELL},
             {"Lα": xraylib.LA_LINE, "Lβ": xraylib.LB_LINE},
         )
         self.labels_MshellInfo = XRFinfo(
-            {"M5": xraylib.M5_SHELL}, {"Mα1": xraylib.MA1_LINE}
+            {"M5": xraylib.M5_SHELL},
+            {"Mα1": xraylib.MA1_LINE},
         )
         layout_labels.addWidget(self.labels_KshellInfo)
         layout_labels.addWidget(self.labels_LshellInfo)
@@ -215,6 +252,13 @@ class PeriodicTable(QtWidgets.QWidget):
         self.setLayout(layout)
 
     def elementButtonHover(self, state, text=None):
+        """
+        Slot for element's button signal 'hover'.
+
+        It changes values in element's symbol and name panel,
+        and XRF information panel.
+        """
+
         if state and text:
             self.element_symbol.setText(text)
             self.element_name.setText(Elements[text])
@@ -222,27 +266,33 @@ class PeriodicTable(QtWidgets.QWidget):
                 Z = xraylib.SymbolToAtomicNumber(text)
             except Exception:
                 Z = -1
-            self.shellInfoSetLabels(Z)
+            self.labels_KshellInfo.setLabels(Z)
+            self.labels_LshellInfo.setLabels(Z)
+            self.labels_MshellInfo.setLabels(Z)
         else:
             self.element_symbol.setText("")
             self.element_name.setText("")
-            self.shellInfoSetLabels()
-
-    def shellInfoSetLabels(self, Z=None):
-        self.labels_KshellInfo.setLabels(Z)
-        self.labels_LshellInfo.setLabels(Z)
-        self.labels_MshellInfo.setLabels(Z)
+            self.labels_KshellInfo.setLabels()
+            self.labels_LshellInfo.setLabels()
+            self.labels_MshellInfo.setLabels()
 
 
 class Element(QtWidgets.QPushButton):
+    """
+    Element's button widget with mouse hovering signal emmiting.
+    """
+
     hover = QtCore.Signal(bool, str)
 
     def __init__(self, text, parent=None):
+        """
+        Widget initialization with default properties and layout configuration.
+        """
+
         super().__init__(text, parent)
 
-        # self.setEnabled(False)
-
         self.setCheckable(True)
+
         self.setMinimumHeight(50)
         self.setMinimumWidth(50)
         self.setSizePolicy(
@@ -251,27 +301,49 @@ class Element(QtWidgets.QPushButton):
         )
 
     def enterEvent(self, event):
+        """
+        Slot for mouse entering signal.
+
+        It emits 'hover' signal with state 'True' and its text (element's symbol).
+        """
+
         self.hover.emit(True, self.text())
         super().enterEvent(event)
 
     def leaveEvent(self, event):
-        self.hover.emit(False, None)
+        """
+        Slot for mouse leaving signal.
+
+        It emits 'hover' signal with state 'False'.
+        """
+
+        self.hover.emit(False)
         super().leaveEvent(event)
 
 
 class XRFinfo(QtWidgets.QWidget):
+    """
+    X-ray Fluorescence information panel widget
+    with absorption edges' and characteristic lines' energies.
+    """
+
     def __init__(self, Edges, Lines, parent=None):
+        """
+        Widget initialization with edges and characteristic lines specification,
+        and layout configuration.
+        """
+
         super().__init__(parent)
 
         self.Edges = Edges
         self.Lines = Lines
 
-        # self.setEnabled(False)
-
+        # --- --- layout --- --- #
         self.edgeLabels = dict()
         self.lineLabels = dict()
         layout = QtWidgets.QGridLayout(self)
 
+        # --- edges --- #
         for iedge, edge in enumerate(self.Edges.keys()):
             self.edgeLabels[edge] = {
                 "label": QtWidgets.QLabel(
@@ -294,6 +366,8 @@ class XRFinfo(QtWidgets.QWidget):
             layout.addWidget(self.edgeLabels[edge]["label"], iedge, 0)
             layout.addWidget(self.edgeLabels[edge]["energy"], iedge, 1)
             layout.addWidget(self.edgeLabels[edge]["unit"], iedge, 2)
+
+        # --- characteristic lines --- #
         for iline, line in enumerate(self.Lines.keys()):
             self.lineLabels[line] = {
                 "label": QtWidgets.QLabel(
@@ -320,6 +394,11 @@ class XRFinfo(QtWidgets.QWidget):
         self.setLayout(layout)
 
     def setLabels(self, Z=None):
+        """
+        Setting values for absorption edges' and characteristic lines' energies.
+        """
+
+        # --- edges --- #
         for edge in self.Edges.keys():
             if Z is None:
                 self.edgeLabels[edge]["energy"].setText("")
@@ -330,6 +409,8 @@ class XRFinfo(QtWidgets.QWidget):
                 )
             except Exception:
                 self.edgeLabels[edge]["energy"].setText("NaN")
+
+        # --- characteristic lines --- #
         for line in self.Lines.keys():
             if Z is None:
                 self.lineLabels[line]["energy"].setText("")
@@ -342,6 +423,9 @@ class XRFinfo(QtWidgets.QWidget):
                 self.lineLabels[line]["energy"].setText("NaN")
 
 
+# --- --- EXECUTABLE --- --- #
+
+# --- running the application --- #
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = main.MainWindow()
