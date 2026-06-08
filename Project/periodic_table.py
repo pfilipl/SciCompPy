@@ -9,7 +9,7 @@ Copyright (C) 2026 Filip J. Baran
 
 # --- --- IMPORTS --- --- #
 
-# --- public libraries --- #
+# --- libraries --- #
 import sys
 import xraylib
 from PySide6 import QtWidgets, QtCore, QtGui
@@ -150,7 +150,7 @@ class PeriodicTable(QtWidgets.QWidget):
     element's symbol and name panel, and X-ray Fluorescence information panel.
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, *, line=None, edge=None, energy=None):
         """
         Widget initialization with layout configuration.
         """
@@ -189,12 +189,24 @@ class PeriodicTable(QtWidgets.QWidget):
         # --- elements' buttons --- #
         period = 1
         group = 1
+        self.elementButtons = dict()
         for element in Elements.keys():
-            element_button = Element(element)
-            element_button.hover.connect(
+            self.elementButtons[element] = Element(element)
+            self.elementButtons[element].hover.connect(
                 self.elementButtonHover
             )  # signal-slot connecting
-            layout.addWidget(element_button, period, group)
+            # disabling elements with n/a or too big energies
+            try:
+                Z = xraylib.SymbolToAtomicNumber(element)
+                if ((line is not None) and (xraylib.LineEnergy(Z, line) == 0)) or (
+                    (edge is not None)
+                    and (energy is not None)
+                    and (xraylib.EdgeEnergy(Z, edge) > energy)
+                ):
+                    self.elementButtons[element].setEnabled(False)
+            except Exception:
+                self.elementButtons[element].setEnabled(False)
+            layout.addWidget(self.elementButtons[element], period, group)
             match element:
                 case "H":
                     group += 17
@@ -229,6 +241,7 @@ class PeriodicTable(QtWidgets.QWidget):
         )
         layout_element.addWidget(self.element_symbol)
         layout_element.addWidget(self.element_name)
+        layout_element.addWidget(QtWidgets.QLabel(""))
 
         # --- X-ray Fluorescence information panel --- #
         layout_labels = QtWidgets.QGridLayout()

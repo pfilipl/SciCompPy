@@ -7,8 +7,9 @@ Copyright (C) 2026 Filip J. Baran
 
 # --- --- IMPORTS --- --- #
 
-# --- public libraries --- #
+# --- libraries --- #
 import sys
+import xraylib
 from PySide6 import QtWidgets
 
 # --- own files --- #
@@ -31,6 +32,8 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__(*args, **kwargs)
 
         self.setWindowTitle("SciCompPy project app: XRF spectra ROI definer")
+        # self.setCentralWidget(periodic_table.PeriodicTable(line=xraylib.KA_LINE, edge=xraylib.K_SHELL, energy=10))
+        # self.setCentralWidget(periodic_table.PeriodicTable(line=xraylib.MA1_LINE))
         self.setCentralWidget(periodic_table.PeriodicTable())
         self.setFixedSize(1000, 600)
 
