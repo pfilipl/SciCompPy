@@ -317,7 +317,7 @@ class Element(QtWidgets.QPushButton):
         It emits 'hover' signal with state 'False'.
         """
 
-        self.hover.emit(False)
+        self.hover.emit(False, None)
         super().leaveEvent(event)
 
 
