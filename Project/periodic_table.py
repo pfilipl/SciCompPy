@@ -10,8 +10,8 @@ Copyright (C) 2026 Filip J. Baran
 # --- --- IMPORTS --- --- #
 
 # --- libraries --- #
-import sys
 import xraylib
+from math import ceil
 from PySide6 import QtWidgets, QtCore, QtGui
 
 # --- own files --- #
@@ -264,7 +264,7 @@ class PeriodicTable(QtWidgets.QWidget):
         )
         layout_element.addWidget(self.element_symbol)
         layout_element.addWidget(self.element_name)
-        layout_element.addWidget(QtWidgets.QLabel(""))
+        layout_element.addWidget(QtWidgets.QLabel())
 
         # --- X-ray Fluorescence information panel --- #
         layout_labels = QtWidgets.QGridLayout()
@@ -334,6 +334,9 @@ class Element(QtWidgets.QPushButton):
         super().__init__(text, parent)
 
         self.setCheckable(True)
+        self.setFont(
+            QtGui.QFont(self.font().family(), ceil(self.font().pointSize() * 1.5))
+        )
 
         self.setMinimumHeight(50)
         self.setMinimumWidth(50)
@@ -369,7 +372,9 @@ class XRFinfo(QtWidgets.QWidget):
     with absorption edges' and characteristic lines' energies.
     """
 
-    def __init__(self, Edges, Lines, parent=None, *, currentLine=None, currentEdge=None):
+    def __init__(
+        self, Edges, Lines, parent=None, *, currentLine=None, currentEdge=None
+    ):
         """
         Widget initialization with edges and characteristic lines specification,
         and layout configuration.
@@ -477,7 +482,4 @@ class XRFinfo(QtWidgets.QWidget):
 
 # --- running the application --- #
 if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    window = main.MainWindow()
-    window.show()
-    sys.exit(app.exec())
+    main.main()
