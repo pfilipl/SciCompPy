@@ -144,13 +144,36 @@ Elements = {
 
 
 # --- classes --- #
+class PeriodicTables(QtWidgets.QTabWidget):
+    """
+    Periodic tables tab widget for specified characteristic lines.
+    """
+
+    def __init__(self, linesAndEdges, energy=None, parent=None):
+        """
+        Widget initialization with specified characteristic lines and edges.
+        """
+
+        super().__init__(parent)
+
+        self.Tabs = dict()
+
+        for name in linesAndEdges.keys():
+            self.Tabs[name] = PeriodicTable(
+                energy,
+                line=linesAndEdges[name]["line"],
+                edge=linesAndEdges[name]["edge"],
+            )
+            self.addTab(self.Tabs[name], name)
+
+
 class PeriodicTable(QtWidgets.QWidget):
     """
     Periodic table widget with checkable elements' buttons,
     element's symbol and name panel, and X-ray Fluorescence information panel.
     """
 
-    def __init__(self, parent=None, *, line=None, edge=None, energy=None):
+    def __init__(self, energy=None, parent=None, *, line=None, edge=None):
         """
         Widget initialization with layout configuration.
         """
@@ -249,14 +272,20 @@ class PeriodicTable(QtWidgets.QWidget):
         self.labels_KshellInfo = XRFinfo(
             {"K": xraylib.K_SHELL},
             {"Kα": xraylib.KA_LINE, "Kβ": xraylib.KB_LINE},
+            currentEdge=edge,
+            currentLine=line,
         )
         self.labels_LshellInfo = XRFinfo(
             {"L3": xraylib.L3_SHELL, "L2": xraylib.L2_SHELL},
             {"Lα": xraylib.LA_LINE, "Lβ": xraylib.LB_LINE},
+            currentEdge=edge,
+            currentLine=line,
         )
         self.labels_MshellInfo = XRFinfo(
             {"M5": xraylib.M5_SHELL},
             {"Mα1": xraylib.MA1_LINE},
+            currentEdge=edge,
+            currentLine=line,
         )
         layout_labels.addWidget(self.labels_KshellInfo)
         layout_labels.addWidget(self.labels_LshellInfo)
@@ -340,7 +369,7 @@ class XRFinfo(QtWidgets.QWidget):
     with absorption edges' and characteristic lines' energies.
     """
 
-    def __init__(self, Edges, Lines, parent=None):
+    def __init__(self, Edges, Lines, parent=None, *, currentLine=None, currentEdge=None):
         """
         Widget initialization with edges and characteristic lines specification,
         and layout configuration.
@@ -376,6 +405,10 @@ class XRFinfo(QtWidgets.QWidget):
             self.edgeLabels[edge]["label"].setMinimumWidth(50)
             self.edgeLabels[edge]["energy"].setMinimumWidth(50)
             self.edgeLabels[edge]["unit"].setMinimumWidth(30)
+            if (currentEdge is not None) and (currentEdge != self.Edges[edge]):
+                self.edgeLabels[edge]["label"].setEnabled(False)
+                self.edgeLabels[edge]["energy"].setEnabled(False)
+                self.edgeLabels[edge]["unit"].setEnabled(False)
             layout.addWidget(self.edgeLabels[edge]["label"], iedge, 0)
             layout.addWidget(self.edgeLabels[edge]["energy"], iedge, 1)
             layout.addWidget(self.edgeLabels[edge]["unit"], iedge, 2)
@@ -400,6 +433,10 @@ class XRFinfo(QtWidgets.QWidget):
             self.lineLabels[line]["label"].setMinimumWidth(50)
             self.lineLabels[line]["energy"].setMinimumWidth(50)
             self.lineLabels[line]["unit"].setMinimumWidth(30)
+            if (currentLine is not None) and (currentLine != self.Lines[line]):
+                self.lineLabels[line]["label"].setEnabled(False)
+                self.lineLabels[line]["energy"].setEnabled(False)
+                self.lineLabels[line]["unit"].setEnabled(False)
             layout.addWidget(self.lineLabels[line]["label"], iline, 3)
             layout.addWidget(self.lineLabels[line]["energy"], iline, 4)
             layout.addWidget(self.lineLabels[line]["unit"], iline, 5)

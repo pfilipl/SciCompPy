@@ -10,7 +10,7 @@ Copyright (C) 2026 Filip J. Baran
 # --- libraries --- #
 import sys
 import xraylib
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets, QtCore
 
 # --- own files --- #
 import periodic_table
@@ -32,10 +32,29 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__(*args, **kwargs)
 
         self.setWindowTitle("SciCompPy project app: XRF spectra ROI definer")
-        # self.setCentralWidget(periodic_table.PeriodicTable(line=xraylib.KA_LINE, edge=xraylib.K_SHELL, energy=10))
-        # self.setCentralWidget(periodic_table.PeriodicTable(line=xraylib.MA1_LINE))
-        self.setCentralWidget(periodic_table.PeriodicTable())
         self.setFixedSize(1000, 600)
+
+        mainWidget = QtWidgets.QTabWidget(
+            tabPosition=QtWidgets.QTabWidget.TabPosition.West
+        )
+        xrfTab = periodic_table.PeriodicTables(
+            {
+                "Kα": {"line": xraylib.KA_LINE, "edge": xraylib.K_SHELL},
+                "Kβ": {"line": xraylib.KB_LINE, "edge": xraylib.K_SHELL},
+                "Lα": {"line": xraylib.LA_LINE, "edge": xraylib.L3_SHELL},
+                "Lβ": {"line": xraylib.LB_LINE, "edge": xraylib.L2_SHELL},
+                "Mα1": {"line": xraylib.MA1_LINE, "edge": xraylib.M5_SHELL},
+            }
+        )
+        self.xrfTab = mainWidget.addTab(xrfTab, "XRF lines")
+        self.manualTab = mainWidget.addTab(
+            QtWidgets.QLabel(
+                "Temporary widget", alignment=QtCore.Qt.AlignmentFlag.AlignCenter
+            ),
+            "Manual",
+        )
+
+        self.setCentralWidget(mainWidget)
 
 
 # --- --- EXECUTABLE --- --- #
