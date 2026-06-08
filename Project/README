@@ -1,7 +1,7 @@
 
 # XRF Spectra ROI Definer
 
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)]
 
 *SciCompPy project application* for defining energetic regions of interest (ROIs)
 for X-ray Fluorescence spectra analysis.
