@@ -166,6 +166,20 @@ class PeriodicTables(QtWidgets.QTabWidget):
             )
             self.addTab(self.Tabs[name], name)
 
+    def changeEnergy(self, energy=None):
+        """
+        Method for changing excitation energy.
+
+        It enables buttons in every defined periodic table widget
+        which element's energies are defined, and its absorption energy 
+        is not greater than specified 'energy' [eV].
+        """
+
+        if energy is not None:
+            energy /= 1000 # [eV] -> [keV] for xraylib
+        for periodicTable in self.Tabs.values():
+            periodicTable.elementButtonsEnabling(energy)
+
 
 class PeriodicTable(QtWidgets.QWidget):
     """
@@ -179,6 +193,10 @@ class PeriodicTable(QtWidgets.QWidget):
         """
 
         super().__init__(parent)
+
+        # --- variables --- #
+        self.line = line
+        self.edge = edge
 
         # --- --- layout  --- --- #
         # --- groups and periods labels --- #
@@ -215,20 +233,7 @@ class PeriodicTable(QtWidgets.QWidget):
         self.elementButtons = dict()
         for element in Elements.keys():
             self.elementButtons[element] = Element(element)
-            self.elementButtons[element].hover.connect(
-                self.elementButtonHover
-            )  # signal-slot connecting
-            # disabling elements with n/a or too big energies
-            try:
-                Z = xraylib.SymbolToAtomicNumber(element)
-                if ((line is not None) and (xraylib.LineEnergy(Z, line) == 0)) or (
-                    (edge is not None)
-                    and (energy is not None)
-                    and (xraylib.EdgeEnergy(Z, edge) > energy)
-                ):
-                    self.elementButtons[element].setEnabled(False)
-            except Exception:
-                self.elementButtons[element].setEnabled(False)
+            self.elementButtons[element].hover.connect(self.elementButtonHover)
             layout.addWidget(self.elementButtons[element], period, group)
             match element:
                 case "H":
@@ -246,6 +251,7 @@ class PeriodicTable(QtWidgets.QWidget):
                     period += 1
                 case _:
                     group += 1
+        self.elementButtonsEnabling(energy)
 
         # --- element's symbol and name panel --- #
         layout_element = QtWidgets.QVBoxLayout()
@@ -272,26 +278,50 @@ class PeriodicTable(QtWidgets.QWidget):
         self.labels_KshellInfo = XRFinfo(
             {"K": xraylib.K_SHELL},
             {"Kα": xraylib.KA_LINE, "Kβ": xraylib.KB_LINE},
-            currentEdge=edge,
-            currentLine=line,
+            currentEdge=self.edge,
+            currentLine=self.line,
         )
         self.labels_LshellInfo = XRFinfo(
             {"L3": xraylib.L3_SHELL, "L2": xraylib.L2_SHELL},
             {"Lα": xraylib.LA_LINE, "Lβ": xraylib.LB_LINE},
-            currentEdge=edge,
-            currentLine=line,
+            currentEdge=self.edge,
+            currentLine=self.line,
         )
         self.labels_MshellInfo = XRFinfo(
             {"M5": xraylib.M5_SHELL},
             {"Mα1": xraylib.MA1_LINE},
-            currentEdge=edge,
-            currentLine=line,
+            currentEdge=self.edge,
+            currentLine=self.line,
         )
         layout_labels.addWidget(self.labels_KshellInfo)
         layout_labels.addWidget(self.labels_LshellInfo)
         layout_labels.addWidget(self.labels_MshellInfo)
 
         self.setLayout(layout)
+
+    def elementButtonsEnabling(self, energy=None):
+        """
+        Method for enabling elements' buttons.
+
+        It enables buttons which element's energies are defined,
+        and its absorption energy is not greater than 'energy' [keV].
+        """
+
+        for element in self.elementButtons.keys():
+            try:
+                Z = xraylib.SymbolToAtomicNumber(element)
+                if (
+                    (self.line is not None) and (xraylib.LineEnergy(Z, self.line) == 0)
+                ) or (
+                    (self.edge is not None)
+                    and (energy is not None)
+                    and (xraylib.EdgeEnergy(Z, self.edge) > energy)
+                ):
+                    self.elementButtons[element].setEnabled(False)
+                else:
+                    self.elementButtons[element].setEnabled(True)
+            except Exception:
+                self.elementButtons[element].setEnabled(False)
 
     def elementButtonHover(self, state, text=None):
         """

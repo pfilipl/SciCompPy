@@ -54,22 +54,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(mainWidget)
 
         # --- XRF tab --- #
-        self.xrfTab = mainWidget.addTab(
-            periodic_table.PeriodicTables(
-                {
-                    "Kα": {"line": xraylib.KA_LINE, "edge": xraylib.K_SHELL},
-                    "Kβ": {"line": xraylib.KB_LINE, "edge": xraylib.K_SHELL},
-                    "Lα": {"line": xraylib.LA_LINE, "edge": xraylib.L3_SHELL},
-                    "Lβ": {"line": xraylib.LB_LINE, "edge": xraylib.L2_SHELL},
-                    "Mα1": {"line": xraylib.MA1_LINE, "edge": xraylib.M5_SHELL},
-                },
-                energy,
-            ),
-            "XRF lines",
+        self.xrfTab = periodic_table.PeriodicTables(
+            {
+                "Kα": {"line": xraylib.KA_LINE, "edge": xraylib.K_SHELL},
+                "Kβ": {"line": xraylib.KB_LINE, "edge": xraylib.K_SHELL},
+                "Lα": {"line": xraylib.LA_LINE, "edge": xraylib.L3_SHELL},
+                "Lβ": {"line": xraylib.LB_LINE, "edge": xraylib.L2_SHELL},
+                "Mα1": {"line": xraylib.MA1_LINE, "edge": xraylib.M5_SHELL},
+            },
+            energy,
         )
+        mainWidget.addTab(self.xrfTab, "XRF lines")
 
         # --- manual tab --- #
-        self.manualTab = mainWidget.addTab(
+        mainWidget.addTab(
             QtWidgets.QLabel(
                 "Temporary widget", alignment=QtCore.Qt.AlignmentFlag.AlignCenter
             ),
@@ -78,14 +76,14 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
 class Detector:
-    """ 
+    """
     Detector object for energetic callibration properties storage.
     """
 
     def __init__(
         self, zero=-647.684, gain=6.953, noise=140, fano=0.006, epsilon=3.85, N=4096
     ):
-        """ 
+        """
         Object initialization with default callibration values.
 
         It sets callibration parameters:
@@ -99,8 +97,8 @@ class Detector:
         self.N = N  # [-]
 
     def calibrate(self, zero, gain, noise, fano):
-        """ 
-        Callibration method.
+        """
+        Method for setting callibration.
 
         It sets callibration parameters:
         'zero' [eV], 'gain' [eV/channel], 'noise' [eV], and 'fano' [-].
@@ -111,18 +109,18 @@ class Detector:
         self.noise = noise  # [eV]
         self.fano = fano  # [-]
 
-    def get_energy(self, channel):
-        """ 
-        Energy getter method.
+    def getEnergy(self, channel):
+        """
+        Method for getting energy.
 
         It returns energy [eV] for specified detector's channel.
         """
 
         return channel * self.gain + self.zero
 
-    def get_sigma(self, energy=None, *, channel=None):
-        """ 
-        Standard deviation getter method.
+    def getSigma(self, energy=None, *, channel=None):
+        """
+        Method for getting standard deviation.
 
         It returns standard deviation (sigma) [eV] for specified energy [eV], or channel.
         """
@@ -133,9 +131,9 @@ class Detector:
             sqrt(self.noise ^ 2 + 2.355 ^ 2 * self.epsilon * self.fano * energy) / 2.335
         )
 
-    def get_channel(self, energy):
-        """ 
-        Channel getter method.
+    def getChannel(self, energy):
+        """
+        Method for getting detector's channel.
 
         It returns detector's channel for specified energy [eV].
         """
