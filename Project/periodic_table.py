@@ -149,6 +149,8 @@ class PeriodicTables(QtWidgets.QTabWidget):
     Periodic tables tab widget for specified characteristic lines.
     """
 
+    elementToggled = QtCore.Signal(bool, str, int)
+
     def __init__(self, linesAndEdges, energy=None, parent=None):
         """
         Widget initialization with specified characteristic lines and edges.
@@ -161,6 +163,7 @@ class PeriodicTables(QtWidgets.QTabWidget):
         for name in linesAndEdges.keys():
             self.Tabs[name] = PeriodicTable(
                 energy,
+                self,
                 line=linesAndEdges[name]["line"],
                 edge=linesAndEdges[name]["edge"],
             )
@@ -234,6 +237,8 @@ class PeriodicTable(QtWidgets.QWidget):
         for element in Elements.keys():
             self.elementButtons[element] = Element(element)
             self.elementButtons[element].hover.connect(self.elementButtonHover)
+            if parent is not None:
+                self.elementButtons[element].toggled.connect(lambda checked, name=element: parent.elementToggled.emit(checked, name, self.line))
             layout.addWidget(self.elementButtons[element], period, group)
             match element:
                 case "H":

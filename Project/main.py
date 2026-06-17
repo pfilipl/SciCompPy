@@ -16,6 +16,7 @@ from PySide6 import QtWidgets, QtCore
 
 # --- own files --- #
 import periodic_table
+import manual
 
 
 # --- --- CODE --- --- #
@@ -42,6 +43,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # --- variables --- #
         self.Detectors = {"SDD1": Detector(), "SDD2": Detector()}
+        # self.Detectors = {
+        #     "SDD1": Detector(),
+        #     "SDD2": Detector(-100, 5, 300, 0.01),
+        #     # "SDD3": Detector(200, 3, 500, 0.01),
+        # }
+        # self.Detectors = {}
 
         # --- --- layout --- --- #
         self.setWindowTitle("SciCompPy project app: XRF Spectra ROI Definer")
@@ -64,15 +71,18 @@ class MainWindow(QtWidgets.QMainWindow):
             },
             energy,
         )
+        self.xrfTab.elementToggled.connect(
+            lambda checked, name, line: self.manualTab.toglleElementROI(
+                checked, name, line
+            )
+        )
         mainWidget.addTab(self.xrfTab, "XRF lines")
 
         # --- manual tab --- #
-        mainWidget.addTab(
-            QtWidgets.QLabel(
-                "Temporary widget", alignment=QtCore.Qt.AlignmentFlag.AlignCenter
-            ),
-            "Manual",
-        )
+        self.manualTab = manual.Manual(self.Detectors)
+        mainWidget.addTab(self.manualTab, "Manual")
+
+        # mainWidget.addTab(self.xrfTab, "XRF lines")
 
 
 class Detector:
@@ -81,7 +91,7 @@ class Detector:
     """
 
     def __init__(
-        self, zero=-647.684, gain=6.953, noise=140, fano=0.006, epsilon=3.85, N=4096
+        self, zero=-647.684, gain=6.953, noise=140.0, fano=0.006, epsilon=3.85, N=4096
     ):
         """
         Object initialization with default callibration values.
@@ -128,7 +138,11 @@ class Detector:
         if (energy is None) and (channel is not None):
             energy = channel * self.gain + self.zero
         return (
-            sqrt(self.noise ^ 2 + 2.355 ^ 2 * self.epsilon * self.fano * energy) / 2.335
+            sqrt(
+                self.noise * self.noise
+                + 2.355 * 2.355 * self.epsilon * self.fano * energy
+            )
+            / 2.335
         )
 
     def getChannel(self, energy):
@@ -146,6 +160,10 @@ class Detector:
 
 # --- running the application --- #
 def main():
+    """
+    Function for executing an application with additional command-line parameters.
+    """
+
     parser = ArgumentParser(
         prog="XRF Spectra ROI Definer",
         description="""
