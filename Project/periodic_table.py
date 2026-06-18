@@ -151,7 +151,7 @@ class PeriodicTables(QtWidgets.QTabWidget):
 
     elementToggled = QtCore.Signal(bool, str, int)
 
-    def __init__(self, linesAndEdges, energy=None, parent=None):
+    def __init__(self, linesAndEdges, energy=None, /, parent=None):
         """
         Widget initialization with specified characteristic lines and edges.
         """
@@ -190,7 +190,7 @@ class PeriodicTable(QtWidgets.QWidget):
     element's symbol and name panel, and X-ray Fluorescence information panel.
     """
 
-    def __init__(self, energy=None, parent=None, *, line=None, edge=None):
+    def __init__(self, energy=None, /, parent=None, *, line=None, edge=None):
         """
         Widget initialization with layout configuration.
         """
@@ -361,7 +361,7 @@ class Element(QtWidgets.QPushButton):
 
     hover = QtCore.Signal(bool, str)
 
-    def __init__(self, text, parent=None):
+    def __init__(self, text, /, parent=None):
         """
         Widget initialization with default properties and layout configuration.
         """
@@ -408,7 +408,7 @@ class XRFinfo(QtWidgets.QWidget):
     """
 
     def __init__(
-        self, Edges, Lines, parent=None, *, currentLine=None, currentEdge=None
+        self, Edges, Lines, /, parent=None, *, currentLine=None, currentEdge=None
     ):
         """
         Widget initialization with edges and characteristic lines specification,

@@ -9,10 +9,11 @@ Copyright (C) 2026 Filip J. Baran
 
 # --- libraries --- #
 import sys
+import json
 import xraylib
 from numpy import sqrt
 from argparse import ArgumentParser
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtWidgets
 
 # --- own files --- #
 import periodic_table
@@ -28,7 +29,7 @@ class MainWindow(QtWidgets.QMainWindow):
     Main window widget.
     """
 
-    def __init__(self, args, parent=None):
+    def __init__(self, args, /, parent=None):
         """
         Widget initialization with layout configuration.
         """
@@ -37,9 +38,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # --- command line arguments --- #
         try:
-            energy = float(args.energy) / 1000  # [eV] -> [keV] for xraylib
+            self.energy = float(args.energy) / 1000  # [eV] -> [keV] for xraylib
         except Exception:
-            energy = None
+            self.energy = None
 
         # --- variables --- #
         self.Detectors = {"SDD1": Detector(), "SDD2": Detector()}
@@ -69,7 +70,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 "Lβ": {"line": xraylib.LB_LINE, "edge": xraylib.L2_SHELL},
                 "Mα1": {"line": xraylib.MA1_LINE, "edge": xraylib.M5_SHELL},
             },
-            energy,
+            self.energy,
         )
         self.xrfTab.elementToggled.connect(
             lambda checked, name, line: self.manualTab.toglleElementROI(
@@ -79,10 +80,33 @@ class MainWindow(QtWidgets.QMainWindow):
         mainWidget.addTab(self.xrfTab, "XRF lines")
 
         # --- manual tab --- #
-        self.manualTab = manual.Manual(self.Detectors)
+        self.manualTab = manual.Manual(self.Detectors, parent=self)
         mainWidget.addTab(self.manualTab, "Manual")
 
         # mainWidget.addTab(self.xrfTab, "XRF lines")
+
+    def exportJSON(self, fname):
+        """
+        Method for exporting JSON file with specified name.
+
+        It creates JSON file with information about:
+        excitation energy, detectors' properties, and defined ROIs.
+        """
+
+        Detectors = {}
+        for detectorName, detector in self.Detectors.items():
+            Detectors[detectorName] = json.loads(detector.getJSON())
+
+        with open(fname, "w") as file:
+            file.write(
+                json.dumps(
+                    {
+                        "Excitation energy [eV]": self.energy * 1000,
+                        "Detectors": Detectors,
+                        "ROIsTable": json.loads(self.manualTab.table.getJSON()),
+                    }
+                )
+            )
 
 
 class Detector:
@@ -153,6 +177,24 @@ class Detector:
         """
 
         return round((energy - self.zero) / self.gain)
+
+    def getJSON(self):
+        """
+        Method for generating JSON structure form detector's properties.
+
+        It returnes JSON structure string with detector's properties.
+        """
+
+        return json.dumps(
+            {
+                "Zero [eV]": self.zero,
+                "Gain [eV/channel]": self.gain,
+                "Noise [eV]": self.noise,
+                "Fano [-]": self.fano,
+                "Epsilon [eV]": self.epsilon,
+                "N [-]": self.N,
+            }
+        )
 
 
 # --- --- EXECUTABLE --- --- #

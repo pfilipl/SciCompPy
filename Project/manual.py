@@ -10,6 +10,7 @@ Copyright (C) 2026 Filip J. Baran
 # --- --- IMPORTS --- --- #
 
 # --- libraries --- #
+import json
 import xraylib
 from numpy import mean
 from PySide6 import QtWidgets, QtCore
@@ -28,14 +29,16 @@ class Manual(QtWidgets.QWidget):
     theirs parameters visualisation, importing, and exporting.
     """
 
-    def __init__(self, Detectors={}, parent=None):
+    def __init__(self, Detectors={}, /, parent=None):
         """
         Widget initialization with layout configuration.
         """
 
+        self.parent = parent
+
         super().__init__(parent)
 
-        self.table = ROIsTable(Detectors)
+        self.table = ROIsTable(Detectors, parent=self)
 
         layout = QtWidgets.QVBoxLayout(self)
         layout_form = QtWidgets.QGridLayout()
@@ -55,6 +58,8 @@ class Manual(QtWidgets.QWidget):
             self.table.addElementROI(name, line)
         else:
             self.table.deleteElementROI(name, line)
+            # if self.parent is not None:  # TEMP
+            #     self.parent.exportJSON("./Project/foo.json")  # TEMP
 
 
 class ROIsTable(QtWidgets.QTableWidget):
@@ -62,7 +67,7 @@ class ROIsTable(QtWidgets.QTableWidget):
     ROIs table widget for theirs parameters visualisation.
     """
 
-    def __init__(self, Detectors={}, parent=None):
+    def __init__(self, Detectors={}, /, parent=None):
         """
         Widget initialization with specified detectors.
         """
@@ -118,7 +123,7 @@ class ROIsTable(QtWidgets.QTableWidget):
         # --- characteristic energy --- #
         try:
             Z = xraylib.SymbolToAtomicNumber(name)
-            energy = xraylib.LineEnergy(Z - 10, line) * 1000
+            energy = xraylib.LineEnergy(Z, line) * 1000
         except Exception as e:
             QtWidgets.QMessageBox(
                 QtWidgets.QMessageBox.Icon.Warning,
@@ -192,6 +197,30 @@ class ROIsTable(QtWidgets.QTableWidget):
 
         for item in self.findItems(ROIName, QtCore.Qt.MatchFlag.MatchExactly):
             self.removeRow(item.row())
+
+    def getJSON(self):
+        """
+        Method for generating JSON structure from ROIsTable.
+
+        It returnes JSON structure string form DataFrame
+        which contains information about ROIs in ROIsTable.
+        """
+
+        ROIsTableHeaders = [
+            self.horizontalHeaderItem(column).text().replace("\n", " ")
+            for column in range(1, self.columnCount())
+        ]
+        ROIsTableNames = [self.item(row, 0).text() for row in range(self.rowCount())]
+        
+        ROIs = []
+        for row in range(self.rowCount()):
+            ROI = []
+            for iheader, header in enumerate(ROIsTableHeaders):
+                item = self.item(row, 1 + iheader)
+                ROI.append(item.text() if item is not None else None)
+            ROIs.append(dict(zip(ROIsTableHeaders, ROI)))
+
+        return json.dumps(dict(zip(ROIsTableNames, ROIs)))
 
 
 # --- --- EXECUTABLE --- --- #
