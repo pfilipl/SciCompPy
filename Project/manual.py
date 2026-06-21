@@ -9,10 +9,12 @@ Copyright (C) 2026 Filip J. Baran
 
 # --- --- IMPORTS --- --- #
 
-# --- libraries --- #
+# --- standard libraries --- #
 import json
+from statistics import fmean
+
+# --- 3rd party libraries --- #
 import xraylib
-from numpy import mean
 from PySide6 import QtWidgets, QtCore
 
 # --- own files --- #
@@ -135,7 +137,7 @@ class ROIsTable(QtWidgets.QTableWidget):
 
         # --- ROI's width in channels --- #
         if self.Detectors == {}:
-            sigma = 100
+            sigma = [100]
         else:
             sigma = []
             for idetector, detector in enumerate(self.Detectors.values()):
@@ -155,16 +157,16 @@ class ROIsTable(QtWidgets.QTableWidget):
                     ),
                 )
 
-        # --- mean ROI's widht in energy --- #
+        # --- fmean ROI's widht in energy --- #
         self.setItem(
             self.rowCount() - 1,
             1,
-            QtWidgets.QTableWidgetItem(f"{energy - mean(sigma) * 2.355 / 2:.0f}"),
+            QtWidgets.QTableWidgetItem(f"{energy - fmean(sigma) * 2.355 / 2:.0f}"),
         )
         self.setItem(
             self.rowCount() - 1,
             2,
-            QtWidgets.QTableWidgetItem(f"{energy + mean(sigma) * 2.355 / 2:.0f}"),
+            QtWidgets.QTableWidgetItem(f"{energy + fmean(sigma) * 2.355 / 2:.0f}"),
         )
 
         # --- text alignment --- #

@@ -9,8 +9,10 @@ Copyright (C) 2026 Filip J. Baran
 
 # --- --- IMPORTS --- --- #
 
-# --- libraries --- #
+# --- standard libraries --- #
 import json
+
+# --- 3rd party libraries --- #
 
 # --- own files --- #
 import main

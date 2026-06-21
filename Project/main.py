@@ -7,12 +7,14 @@ Copyright (C) 2026 Filip J. Baran
 
 # --- --- IMPORTS --- --- #
 
-# --- libraries --- #
+# --- standard libraries --- #
 import sys
 import json
-import xraylib
-from numpy import sqrt
+from math import sqrt
 from argparse import ArgumentParser
+
+# --- 3rd party libraries --- #
+import xraylib
 from PySide6 import QtWidgets, QtCore, QtGui
 
 # --- own files --- #

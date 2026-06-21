@@ -9,9 +9,11 @@ Copyright (C) 2026 Filip J. Baran
 
 # --- --- IMPORTS --- --- #
 
-# --- libraries --- #
-import xraylib
+# --- standard libraries --- #
 from math import ceil
+
+# --- 3rd party libraries --- #
+import xraylib
 from PySide6 import QtWidgets, QtCore, QtGui
 
 # --- own files --- #
