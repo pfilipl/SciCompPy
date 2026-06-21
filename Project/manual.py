@@ -34,17 +34,13 @@ class Manual(QtWidgets.QWidget):
         Widget initialization with layout configuration.
         """
 
-        self.parent = parent
-
         super().__init__(parent)
-
-        self.table = ROIsTable(Detectors, parent=self)
 
         layout = QtWidgets.QVBoxLayout(self)
         layout_form = QtWidgets.QGridLayout()
         layout.addLayout(layout_form)
+        self.table = ROIsTable(Detectors, parent=self)
         layout.addWidget(self.table)
-
         self.setLayout(layout)
 
     def toglleElementROI(self, checked, name, line):
@@ -58,8 +54,6 @@ class Manual(QtWidgets.QWidget):
             self.table.addElementROI(name, line)
         else:
             self.table.deleteElementROI(name, line)
-            # if self.parent is not None:  # TEMP
-            #     self.parent.exportJSON("./Project/foo.json")  # TEMP
 
 
 class ROIsTable(QtWidgets.QTableWidget):
@@ -206,12 +200,22 @@ class ROIsTable(QtWidgets.QTableWidget):
         which contains information about ROIs in ROIsTable.
         """
 
-        ROIsTableHeaders = [
-            self.horizontalHeaderItem(column).text().replace("\n", " ")
-            for column in range(1, self.columnCount())
-        ]
-        ROIsTableNames = [self.item(row, 0).text() for row in range(self.rowCount())]
-        
+        ROIsTableHeaders = []
+        for column in range(1, self.columnCount()):
+            item = self.horizontalHeaderItem(column)
+            ROIsTableHeaders.append(
+                item.text().replace("\n", " ")
+                if type(item) is QtWidgets.QTableWidgetItem
+                else ""
+            )
+
+        ROIsTableNames = []
+        for row in range(self.rowCount()):
+            item = self.item(row, 0)
+            ROIsTableNames.append(
+                item.text() if type(item) is QtWidgets.QTableWidgetItem else ""
+            )
+
         ROIs = []
         for row in range(self.rowCount()):
             ROI = []

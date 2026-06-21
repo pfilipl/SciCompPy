@@ -13,11 +13,12 @@ import json
 import xraylib
 from numpy import sqrt
 from argparse import ArgumentParser
-from PySide6 import QtWidgets
+from PySide6 import QtWidgets, QtCore, QtGui
 
 # --- own files --- #
 import periodic_table
 import manual
+import files
 
 
 # --- --- CODE --- --- #
@@ -31,7 +32,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, args, /, parent=None):
         """
-        Widget initialization with layout configuration.
+        Widget initialization with layout and toolbar configuration.
         """
 
         super().__init__(parent)
@@ -55,7 +56,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("SciCompPy project app: XRF Spectra ROI Definer")
         self.setFixedSize(1000, 600)
 
-        # --- central widget --- #
         mainWidget = QtWidgets.QTabWidget(
             tabPosition=QtWidgets.QTabWidget.TabPosition.West
         )
@@ -83,30 +83,123 @@ class MainWindow(QtWidgets.QMainWindow):
         self.manualTab = manual.Manual(self.Detectors, parent=self)
         mainWidget.addTab(self.manualTab, "Manual")
 
-        # mainWidget.addTab(self.xrfTab, "XRF lines")
+        # --- --- toolbar --- --- #
+        toolbar = QtWidgets.QToolBar(
+            "Main toolbar",
+            movable=False,
+            floatable=False,
+            iconSize=QtCore.QSize(24, 24),
+            toolButtonStyle=QtCore.Qt.ToolButtonStyle.ToolButtonTextBesideIcon,
+        )
+        self.addToolBar(toolbar)
 
-    def exportJSON(self, fname):
-        """
-        Method for exporting JSON file with specified name.
+        # --- import --- #
+        importAction = QtGui.QAction(
+            QtGui.QIcon.fromTheme(QtGui.QIcon.ThemeIcon.DocumentOpen),
+            "Import",
+            self,
+            enabled=False,
+        )
+        importAction.triggered.connect(lambda checked: self.importTriggered(checked))
+        toolbar.addAction(importAction)
 
-        It creates JSON file with information about:
-        excitation energy, detectors' properties, and defined ROIs.
-        """
+        # --- export --- #
+        exportAction = QtGui.QAction(
+            QtGui.QIcon.fromTheme(QtGui.QIcon.ThemeIcon.DocumentSaveAs), "Export", self
+        )
+        exportAction.triggered.connect(lambda checked: self.exportTriggered(checked))
+        toolbar.addAction(exportAction)
 
-        Detectors = {}
-        for detectorName, detector in self.Detectors.items():
-            Detectors[detectorName] = json.loads(detector.getJSON())
-
-        with open(fname, "w") as file:
-            file.write(
-                json.dumps(
-                    {
-                        "Excitation energy [eV]": self.energy * 1000,
-                        "Detectors": Detectors,
-                        "ROIsTable": json.loads(self.manualTab.table.getJSON()),
-                    }
+        # --- separator --- #
+        toolbar.addWidget(
+            QtWidgets.QWidget(
+                sizePolicy=QtWidgets.QSizePolicy(
+                    QtWidgets.QSizePolicy.Policy.Expanding,
+                    QtWidgets.QSizePolicy.Policy.Preferred,
                 )
             )
+        )
+
+        # --- reset --- #
+        resetAction = QtGui.QAction(
+            QtGui.QIcon.fromTheme(QtGui.QIcon.ThemeIcon.ViewRestore),
+            "Reset",
+            self,
+            enabled=False,
+        )
+        resetAction.triggered.connect(lambda checked: self.resetTriggered(checked))
+        toolbar.addAction(resetAction)
+
+    def importTriggered(self, checked):
+        """
+        Slot for toolbar's 'Import' action signal 'triggered'.
+
+        It opens file dialog to take the file, and executes importing data.
+        """
+
+        pass
+
+    def exportTriggered(self, checked):
+        """
+        Slot for toolbar's 'Export' action signal 'triggered'.
+
+        It opens file dialog to take filename, and executes exporting data.
+        """
+
+        fileName = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            "Export file",
+            "./Project/ROIs.json",
+            "JSON files (*.json);;Text files (*.txt *.csv)",
+        )
+        match fileName[0].split(".")[-1]:
+            case "json":
+                try:
+                    files.exportJSON(
+                        fileName[0], self.energy, self.Detectors, self.manualTab.table
+                    )
+                except Exception as e:
+                    QtWidgets.QMessageBox(
+                        QtWidgets.QMessageBox.Icon.Warning,
+                        "Export data",
+                        f"An error occurred during exporting data:\n\n{e}",
+                        buttons=QtWidgets.QMessageBox.StandardButton.Ok,
+                    ).exec()
+                else:
+                    QtWidgets.QMessageBox(
+                        QtWidgets.QMessageBox.Icon.Information,
+                        "Export data",
+                        f"Data was succesfully exported to file:\n\n{fileName[0]}",
+                        buttons=QtWidgets.QMessageBox.StandardButton.Ok,
+                    ).exec()
+            case "txt" | "csv":
+                try:
+                    pass
+                except Exception as e:
+                    QtWidgets.QMessageBox(
+                        QtWidgets.QMessageBox.Icon.Warning,
+                        "Export data",
+                        f"An error occurred during exporting data:\n\n{e}",
+                        buttons=QtWidgets.QMessageBox.StandardButton.Ok,
+                    ).exec()
+                else:
+                    QtWidgets.QMessageBox(
+                        QtWidgets.QMessageBox.Icon.Information,
+                        "Export data",
+                        f"Data was succesfully exported to file:\n\n{fileName[0]}",
+                        buttons=QtWidgets.QMessageBox.StandardButton.Ok,
+                    ).exec()
+            case _:
+                return
+
+    def resetTriggered(self, checked):
+        """
+        Slot for toolbar's 'Reset' action signal 'triggered'.
+
+        It opens file dialog to confirm the action, and reseting whole applicataion.
+        """
+
+        pass
 
 
 class Detector:
