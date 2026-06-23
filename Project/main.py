@@ -102,14 +102,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self,
             enabled=False,
         )
-        importAction.triggered.connect(lambda checked: self.importTriggered(checked))
+        importAction.triggered.connect(self.importTriggered)
         toolbar.addAction(importAction)
 
         # --- export --- #
         exportAction = QtGui.QAction(
             QtGui.QIcon.fromTheme(QtGui.QIcon.ThemeIcon.DocumentSaveAs), "Export", self
         )
-        exportAction.triggered.connect(lambda checked: self.exportTriggered(checked))
+        exportAction.triggered.connect(self.exportTriggered)
         toolbar.addAction(exportAction)
 
         # --- separator --- #
@@ -124,15 +124,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # --- reset --- #
         resetAction = QtGui.QAction(
-            QtGui.QIcon.fromTheme(QtGui.QIcon.ThemeIcon.ViewRestore),
-            "Reset",
-            self,
-            enabled=False,
+            QtGui.QIcon.fromTheme(QtGui.QIcon.ThemeIcon.ViewRestore), "Reset", self
         )
-        resetAction.triggered.connect(lambda checked: self.resetTriggered(checked))
+        resetAction.triggered.connect(self.resetTriggered)
         toolbar.addAction(resetAction)
 
-    def importTriggered(self, checked):
+    def importTriggered(self):
         """
         Slot for toolbar's 'Import' action signal 'triggered'.
 
@@ -141,7 +138,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         pass
 
-    def exportTriggered(self, checked):
+    def exportTriggered(self):
         """
         Slot for toolbar's 'Export' action signal 'triggered'.
 
@@ -194,14 +191,26 @@ class MainWindow(QtWidgets.QMainWindow):
             case _:
                 return
 
-    def resetTriggered(self, checked):
+    def resetTriggered(self):
         """
         Slot for toolbar's 'Reset' action signal 'triggered'.
 
         It opens file dialog to confirm the action, and reseting whole applicataion.
         """
 
-        pass
+        if (
+            QtWidgets.QMessageBox.question(
+                self,
+                "Reset",
+                "Do you really want to reset the application?\nDefined ROIs will be lost.",
+                defaultButton=QtWidgets.QMessageBox.StandardButton.No,
+            )
+            == QtWidgets.QMessageBox.StandardButton.Yes
+        ):
+            self.xrfTab.uncheckAll()
+            numberOfRows = self.manualTab.table.rowCount()
+            for row in range(numberOfRows + 1):
+                self.manualTab.table.removeRow(numberOfRows - row)
 
 
 class Detector:

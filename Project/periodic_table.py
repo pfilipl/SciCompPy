@@ -185,6 +185,15 @@ class PeriodicTables(QtWidgets.QTabWidget):
         for periodicTable in self.Tabs.values():
             periodicTable.elementButtonsEnabling(energy)
 
+    def uncheckAll(self):
+        """
+        Method for unchecking all element's buttons
+        in all periodic tables.
+        """
+
+        for periodicTable in self.Tabs.values():
+            periodicTable.elementButtonsUncheck()
+
 
 class PeriodicTable(QtWidgets.QWidget):
     """
@@ -329,6 +338,14 @@ class PeriodicTable(QtWidgets.QWidget):
                     self.elementButtons[element].setEnabled(True)
             except Exception:
                 self.elementButtons[element].setEnabled(False)
+
+    def elementButtonsUncheck(self):
+        """
+        Method for uncheck all element's buttons.
+        """
+
+        for button in self.elementButtons.values():
+            button.setChecked(False)
 
     def elementButtonHover(self, state, text=None):
         """
