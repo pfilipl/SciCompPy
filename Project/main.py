@@ -46,6 +46,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.defaultEnergy = None
         self.energy = self.defaultEnergy
 
+        try:
+            self.returning = args.returning
+        except Exception:
+            self.returning = False
+        print(self.returning)
+
         # --- variables --- #
         self.defaultDetectors = {"SDD1": Detector(), "SDD2": Detector()}
         # self.Detectors = self.defaultDetectors
@@ -312,6 +318,29 @@ class MainWindow(QtWidgets.QMainWindow):
                 )
                 layout.addWidget(self.manualTab.table)
 
+    def closeEvent(self, event):
+        """
+        Slot for closing the application.
+        """
+
+        if self.returning == "vars":
+            return self.energy, self.Detectors, self.manualTab.table
+        elif self.returning == "json":
+            DetectorsJSON = {}
+            for name, detector in self.Detectors.items():
+                DetectorsJSON[name] = json.loads(detector.getJSON())
+            print(
+                json.dumps(
+                    {
+                        "Excitation energy [eV]": self.energy * 1000
+                        if self.energy is not None
+                        else None,
+                        "Detectors": DetectorsJSON,
+                        "ROIsTable": json.loads(self.manualTab.table.getJSON()),
+                    }
+                )
+            )
+
 
 class Detector:
     """
@@ -418,6 +447,9 @@ def main():
         """,
     )
     parser.add_argument("-e", "--energy", required=False, help="excitation energy [eV]")
+    parser.add_argument(
+        "-r", "--returning", required=False, choices= ["vars", "json"], help="returning data do console: 'vars' for variables, 'json' for JSON string"
+    )
     args = parser.parse_args()
 
     app = QtWidgets.QApplication(sys.argv)

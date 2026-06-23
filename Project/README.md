@@ -19,6 +19,6 @@ for X-ray Fluorescence spectra analysis.
 
 ```bash
 
-python main.py [-h] [-e ENERGY]
+python main.py [-h] [-e ENERGY] [-r {vars,json}]
 ```
 
