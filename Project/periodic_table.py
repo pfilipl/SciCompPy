@@ -175,7 +175,8 @@ class PeriodicTables(QtWidgets.QTabWidget):
         """
         Method for changing excitation energy.
 
-        It enables buttons in every defined periodic table widget
+        It shows excitation energy,
+        and enables buttons in every defined periodic table widget
         which element's energies are defined, and its absorption energy
         is not greater than specified 'energy' [eV].
         """
@@ -184,6 +185,12 @@ class PeriodicTables(QtWidgets.QTabWidget):
             energy /= 1000  # [eV] -> [keV] for xraylib
         for periodicTable in self.Tabs.values():
             periodicTable.elementButtonsEnabling(energy)
+            if energy is not None:
+                periodicTable.excitationEnergy.setText(f"E = {energy:.4f} keV")
+                periodicTable.excitationEnergy.setToolTip("Excitation energy")
+            else:
+                periodicTable.excitationEnergy.setText("")
+                periodicTable.excitationEnergy.setToolTip("")
 
     def uncheckAll(self):
         """
@@ -229,8 +236,10 @@ class PeriodicTable(QtWidgets.QWidget):
         self.edge = edge
 
         # --- --- layout  --- --- #
-        # --- groups and periods labels --- #
         layout = QtWidgets.QGridLayout(self)
+        self.setLayout(layout)
+
+        # --- groups and periods labels --- #
         for group in range(1, 19):
             layout.addWidget(
                 QtWidgets.QLabel(
@@ -333,7 +342,13 @@ class PeriodicTable(QtWidgets.QWidget):
         layout_labels.addWidget(self.labels_LshellInfo)
         layout_labels.addWidget(self.labels_MshellInfo)
 
-        self.setLayout(layout)
+        # --- excitation energy label --- #
+        self.excitationEnergy = QtWidgets.QLabel()
+        self.excitationEnergy.setFont(QtGui.QFont(self.font().family(), ceil(self.font().pointSize() * 1.5)))
+        layout.addWidget(self.excitationEnergy, 1, 13, 1, 5, QtCore.Qt.AlignmentFlag.AlignCenter)
+        if energy is not None:
+            self.excitationEnergy.setText(f"E = {energy:.4f} keV")
+            self.excitationEnergy.setToolTip("Excitation energy")        
 
     def elementButtonsEnabling(self, energy=None):
         """

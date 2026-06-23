@@ -50,7 +50,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.returning = args.returning
         except Exception:
             self.returning = False
-        print(self.returning)
 
         # --- variables --- #
         self.defaultDetectors = {"SDD1": Detector(), "SDD2": Detector()}
@@ -323,23 +322,34 @@ class MainWindow(QtWidgets.QMainWindow):
         Slot for closing the application.
         """
 
-        if self.returning == "vars":
-            return self.energy, self.Detectors, self.manualTab.table
-        elif self.returning == "json":
-            DetectorsJSON = {}
-            for name, detector in self.Detectors.items():
-                DetectorsJSON[name] = json.loads(detector.getJSON())
-            print(
-                json.dumps(
-                    {
-                        "Excitation energy [eV]": self.energy * 1000
-                        if self.energy is not None
-                        else None,
-                        "Detectors": DetectorsJSON,
-                        "ROIsTable": json.loads(self.manualTab.table.getJSON()),
-                    }
-                )
+        if (
+            QtWidgets.QMessageBox.question(
+                self,
+                "Quit",
+                "Do you really want to quit?\nDefined ROIs will be lost.",
+                defaultButton=QtWidgets.QMessageBox.StandardButton.No,
             )
+            == QtWidgets.QMessageBox.StandardButton.Yes
+        ):
+            if self.returning == "vars":
+                return self.energy, self.Detectors, self.manualTab.table
+            elif self.returning == "json":
+                DetectorsJSON = {}
+                for name, detector in self.Detectors.items():
+                    DetectorsJSON[name] = json.loads(detector.getJSON())
+                print(
+                    json.dumps(
+                        {
+                            "Excitation energy [eV]": self.energy * 1000
+                            if self.energy is not None
+                            else None,
+                            "Detectors": DetectorsJSON,
+                            "ROIsTable": json.loads(self.manualTab.table.getJSON()),
+                        }
+                    )
+                )
+        else:
+            event.ignore()
 
 
 class Detector:
