@@ -48,12 +48,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # --- variables --- #
         self.defaultDetectors = {"SDD1": Detector(), "SDD2": Detector()}
-        self.Detectors = self.defaultDetectors
-        # self.Detectors = {
-        #     "SDD1": Detector(),
-        #     "SDD2": Detector(-100, 5, 300, 0.01),
-        #     "SDD3": Detector(200, 3, 500, 0.01),
-        # }
+        # self.Detectors = self.defaultDetectors
+        self.Detectors = {
+            "SDD1": Detector(),
+            "SDD2": Detector(-100, 5, 300, 0.01),
+            "SDD3": Detector(200, 3, 500, 0.01),
+        }
         # self.Detectors = {}
 
         # --- --- layout --- --- #
@@ -178,6 +178,16 @@ class MainWindow(QtWidgets.QMainWindow):
                                 self.manualTab.table = manual.ROIsTable(
                                     self.Detectors, parent=self.manualTab
                                 )
+                                self.manualTab.table.cellChanged.connect(
+                                    lambda row, column: self.manualTab.ROIChanged(
+                                        row, column
+                                    )
+                                )
+                                self.manualTab.table.horizontalHeader().sectionDoubleClicked.connect(
+                                    lambda column: self.manualTab.table.sortByColumn(
+                                        column, QtCore.Qt.SortOrder.AscendingOrder
+                                    )
+                                )
                                 layout.addWidget(self.manualTab.table)
                             for ROIName, ROIData in ROIsTable.items():
                                 self.manualTab.table.addROI(
@@ -291,6 +301,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.manualTab.table.deleteLater()
                 self.manualTab.table = manual.ROIsTable(
                     self.Detectors, parent=self.manualTab
+                )
+                self.manualTab.table.cellChanged.connect(
+                    lambda row, column: self.manualTab.ROIChanged(row, column)
+                )
+                self.manualTab.table.horizontalHeader().sectionDoubleClicked.connect(
+                    lambda column: self.manualTab.table.sortByColumn(
+                        column, QtCore.Qt.SortOrder.AscendingOrder
+                    )
                 )
                 layout.addWidget(self.manualTab.table)
 

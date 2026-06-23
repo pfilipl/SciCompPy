@@ -46,6 +46,11 @@ class Manual(QtWidgets.QWidget):
         layout.addLayout(layout_form)
         self.table = ROIsTable(Detectors, parent=self)
         self.table.cellChanged.connect(lambda row, column: self.ROIChanged(row, column))
+        self.table.horizontalHeader().sectionDoubleClicked.connect(
+            lambda column: self.table.sortByColumn(
+                column, QtCore.Qt.SortOrder.AscendingOrder
+            )
+        )
         layout.addWidget(self.table)
         self.setLayout(layout)
 
@@ -60,7 +65,7 @@ class Manual(QtWidgets.QWidget):
             self.table.addElementROI(name, line)
         else:
             self.table.deleteElementROI(name, line)
-    
+
     def ROIChanged(self, row, column):
         """
         Slot for ROIs table signal 'cellChanged'.
@@ -147,22 +152,22 @@ class ROIsTable(QtWidgets.QTableWidget):
                         self.rowCount() - 1, 0, QtWidgets.QTableWidgetItem(ROIName)
                     )
                     for ikey, key in enumerate(ROIData.keys()):
-                        self.setItem(
-                            self.rowCount() - 1,
-                            1 + ikey,
-                            QtWidgets.QTableWidgetItem(ROIData[key]),
+                        tempItem = QtWidgets.QTableWidgetItem()
+                        tempItem.setData(
+                            QtCore.Qt.ItemDataRole.DisplayRole, int(ROIData[key])
                         )
+                        self.setItem(self.rowCount() - 1, 1 + ikey, tempItem)
             except Exception:
                 self.insertRow(self.rowCount())
                 self.setItem(
                     self.rowCount() - 1, 0, QtWidgets.QTableWidgetItem(ROIName)
                 )
                 for ikey, key in enumerate(ROIData.keys()):
-                    self.setItem(
-                        self.rowCount() - 1,
-                        1 + ikey,
-                        QtWidgets.QTableWidgetItem(ROIData[key]),
+                    tempItem = QtWidgets.QTableWidgetItem()
+                    tempItem.setData(
+                        QtCore.Qt.ItemDataRole.DisplayRole, int(ROIData[key])
                     )
+                    self.setItem(self.rowCount() - 1, 1 + ikey, tempItem)
         else:
             # self.insertRow(self.rowCount())
             # self.setItem(self.rowCount() - 1, 0, QtWidgets.QTableWidgetItem(ROIName))
@@ -257,32 +262,30 @@ class ROIsTable(QtWidgets.QTableWidget):
             sigma = []
             for idetector, detector in enumerate(self.Detectors.values()):
                 sigma.append(detector.getSigma(energy))
-                self.setItem(
-                    self.rowCount() - 1,
-                    3 + idetector * 2,
-                    QtWidgets.QTableWidgetItem(
-                        f"{detector.getChannel(energy - sigma[-1] * 2.355 / 2):d}"
-                    ),
+                tempItemMinus = QtWidgets.QTableWidgetItem()
+                tempItemMinus.setData(
+                    QtCore.Qt.ItemDataRole.DisplayRole,
+                    int(detector.getChannel(energy - sigma[-1] * 2.355 / 2)),
                 )
-                self.setItem(
-                    self.rowCount() - 1,
-                    3 + idetector * 2 + 1,
-                    QtWidgets.QTableWidgetItem(
-                        f"{detector.getChannel(energy + sigma[-1] * 2.355 / 2):d}"
-                    ),
+                self.setItem(self.rowCount() - 1, 3 + idetector * 2, tempItemMinus)
+                tempItemPlus = QtWidgets.QTableWidgetItem()
+                tempItemPlus.setData(
+                    QtCore.Qt.ItemDataRole.DisplayRole,
+                    int(detector.getChannel(energy + sigma[-1] * 2.355 / 2)),
                 )
+                self.setItem(self.rowCount() - 1, 3 + idetector * 2 + 1, tempItemPlus)
 
         # --- fmean ROI's widht in energy --- #
-        self.setItem(
-            self.rowCount() - 1,
-            1,
-            QtWidgets.QTableWidgetItem(f"{energy - fmean(sigma) * 2.355 / 2:.0f}"),
+        tempItemMinus = QtWidgets.QTableWidgetItem()
+        tempItemMinus.setData(
+            QtCore.Qt.ItemDataRole.DisplayRole, int(energy - fmean(sigma) * 2.355 / 2)
         )
-        self.setItem(
-            self.rowCount() - 1,
-            2,
-            QtWidgets.QTableWidgetItem(f"{energy + fmean(sigma) * 2.355 / 2:.0f}"),
+        self.setItem(self.rowCount() - 1, 1, tempItemMinus)
+        tempItemPlus = QtWidgets.QTableWidgetItem()
+        tempItemPlus.setData(
+            QtCore.Qt.ItemDataRole.DisplayRole, int(energy + fmean(sigma) * 2.355 / 2)
         )
+        self.setItem(self.rowCount() - 1, 2, tempItemPlus)
 
         # --- text alignment --- #
         # for item in (
