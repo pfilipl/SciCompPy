@@ -86,7 +86,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 checked, name, line
             )
         )
-        mainWidget.addTab(self.xrfTab, "XRF lines")
+        # mainWidget.addTab(self.xrfTab, "XRF lines")
 
         # --- manual tab --- #
         self.manualTab = manual.Manual(self.Detectors, parent=self)
@@ -96,6 +96,7 @@ class MainWindow(QtWidgets.QMainWindow):
             )
         )
         mainWidget.addTab(self.manualTab, "Manual")
+        mainWidget.addTab(self.xrfTab, "XRF lines")
 
         # --- --- toolbar --- --- #
         toolbar = QtWidgets.QToolBar(

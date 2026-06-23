@@ -11,6 +11,7 @@ Copyright (C) 2026 Filip J. Baran
 
 # --- standard libraries --- #
 import json
+from math import ceil
 from statistics import fmean
 
 # --- 3rd party libraries --- #
@@ -41,9 +42,92 @@ class Manual(QtWidgets.QWidget):
 
         super().__init__(parent)
 
+        # --- --- layout --- --- #
         layout = QtWidgets.QVBoxLayout(self)
         layout_form = QtWidgets.QGridLayout()
         layout.addLayout(layout_form)
+
+        # --- manual form --- #
+        self.manualName = QtWidgets.QLineEdit(
+            placeholderText="Name...", alignment=QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        self.manualName.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+        )
+        self.manualName.setFont(
+            QtGui.QFont(self.font().family(), ceil(self.font().pointSize() * 1.5))
+        )
+
+        self.manualLineRadio = QtWidgets.QRadioButton("Line and width")
+        self.manualLineRadio.setLayoutDirection(QtCore.Qt.LayoutDirection.RightToLeft)
+        self.manualLineRadio.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
+        )
+        self.manualLineRadio.setChecked(True)
+
+        self.manualLine = QtWidgets.QSpinBox(
+            prefix="E = ", suffix=" eV", minimum=0, maximum=100000
+        )
+        self.manualLine.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+        )
+
+        self.manualWidthSigmaRadio = QtWidgets.QRadioButton()
+        self.manualWidthSigmaRadio.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
+        )
+        self.manualWidthSigmaRadio.setChecked(True)
+        self.manualWidthSigma = QtWidgets.QDoubleSpinBox(
+            prefix="± ", suffix=" σ", minimum=0.0, value=0.5, maximum=5, singleStep=0.01
+        )
+
+        self.manualWidthEnergyRadio = QtWidgets.QRadioButton()
+        self.manualWidthEnergyRadio.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
+        )
+        self.manualWidthEnergy = QtWidgets.QSpinBox(
+            prefix="± ", suffix=" eV", minimum=0, value=50, maximum=50000
+        )
+
+        self.manualEnergyRangeRadio = QtWidgets.QRadioButton("Energy range")
+        self.manualEnergyRangeRadio.setLayoutDirection(
+            QtCore.Qt.LayoutDirection.RightToLeft
+        )
+        self.manualEnergyRangeRadio.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
+        )
+        self.manualEnergyRangeMin = QtWidgets.QSpinBox(
+            prefix="Emin = ", suffix=" eV", minimum=0, maximum=100000
+        )
+        self.manualEnergyRangeMax = QtWidgets.QSpinBox(
+            prefix="Emax = ", suffix=" eV", minimum=0, maximum=100000
+        )
+
+        self.manualAddROI = QtWidgets.QPushButton("Add\nROI")
+        self.manualAddROI.setFont(
+            QtGui.QFont(self.font().family(), ceil(self.font().pointSize() * 1.5))
+        )
+        self.manualAddROI.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+        )
+        self.manualAddROI.pressed.connect(self.pressManualAddROI)
+
+        layout_form.addWidget(self.manualName, 1, 0, 3, 2)
+        layout_form.addWidget(self.manualLineRadio, 1, 3, 2, 1)
+        layout_form.addWidget(self.manualLine, 1, 4, 2, 1)
+        layout_form.addWidget(self.manualWidthSigma, 1, 5, 1, 1)
+        layout_form.addWidget(self.manualWidthSigmaRadio, 1, 6, 1, 1)
+        layout_form.addWidget(self.manualWidthEnergy, 2, 5, 1, 1)
+        layout_form.addWidget(self.manualWidthEnergyRadio, 2, 6, 1, 1)
+        layout_form.addWidget(self.manualEnergyRangeRadio, 3, 3, 1, 1)
+        layout_form.addWidget(self.manualEnergyRangeMin, 3, 4, 1, 1)
+        layout_form.addWidget(self.manualEnergyRangeMax, 3, 5, 1, 1)
+        layout_form.addWidget(self.manualAddROI, 1, 7, 3, 1)
+
+        # --- ROIs table --- #
         self.table = ROIsTable(Detectors, parent=self)
         self.table.cellChanged.connect(lambda row, column: self.ROIChanged(row, column))
         self.table.horizontalHeader().sectionDoubleClicked.connect(
@@ -79,6 +163,17 @@ class Manual(QtWidgets.QWidget):
             if changedIitem in self.table.selectedItems() and nameItem is not None:
                 if nameItem.text().split("_")[-1] != "edited":
                     nameItem.setText(nameItem.text() + "_edited")
+
+    def pressManualAddROI(self):
+        """
+        Slot for manual Add ROI button signal 'pressed'.
+
+        It adds manually defined ROI to ROIs table.
+        """
+
+        ROIName = self.manualName.text()
+        ROIData = {}
+        self.table.addROI(ROIName, ROIData, parent=self)
 
 
 class ROIsTable(QtWidgets.QTableWidget):
@@ -171,7 +266,7 @@ class ROIsTable(QtWidgets.QTableWidget):
         else:
             # self.insertRow(self.rowCount())
             # self.setItem(self.rowCount() - 1, 0, QtWidgets.QTableWidgetItem(ROIName))
-            pass
+            print(ROIName, ROIData)
 
         # --- text alignment --- #
         # for item in (
