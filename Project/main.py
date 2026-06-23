@@ -41,16 +41,18 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # --- command line arguments --- #
         try:
-            self.energy = float(args.energy) / 1000  # [eV] -> [keV] for xraylib
+            self.defaultEnergy = float(args.energy) / 1000  # [eV] -> [keV] for xraylib
         except Exception:
-            self.energy = None
+            self.defaultEnergy = None
+        self.energy = self.defaultEnergy
 
         # --- variables --- #
-        self.Detectors = {"SDD1": Detector(), "SDD2": Detector()}
+        self.defaultDetectors = {"SDD1": Detector(), "SDD2": Detector()}
+        self.Detectors = self.defaultDetectors
         # self.Detectors = {
         #     "SDD1": Detector(),
         #     "SDD2": Detector(-100, 5, 300, 0.01),
-        #     # "SDD3": Detector(200, 3, 500, 0.01),
+        #     "SDD3": Detector(200, 3, 500, 0.01),
         # }
         # self.Detectors = {}
 
@@ -105,7 +107,6 @@ class MainWindow(QtWidgets.QMainWindow):
             QtGui.QIcon.fromTheme(QtGui.QIcon.ThemeIcon.DocumentOpen),
             "Import",
             self,
-            enabled=False,
         )
         importAction.triggered.connect(self.importTriggered)
         toolbar.addAction(importAction)
@@ -141,7 +142,79 @@ class MainWindow(QtWidgets.QMainWindow):
         It opens file dialog to take the file, and executes importing data.
         """
 
-        pass
+        if (
+            QtWidgets.QMessageBox.question(
+                self,
+                "Import",
+                "Do you really want to import data?\nDefined ROIs will be lost.",
+                defaultButton=QtWidgets.QMessageBox.StandardButton.No,
+            )
+            == QtWidgets.QMessageBox.StandardButton.Yes
+        ):
+            fileName = QtWidgets.QFileDialog.getOpenFileName(
+                self,
+                "Export file",
+                "./Project/",
+                "JSON files (*.json);;Text files (*.txt *.csv)",
+            )
+            if fileName[0]:
+                self.xrfTab.uncheckAll()
+                numberOfRows = self.manualTab.table.rowCount()
+                for row in range(numberOfRows + 1):
+                    self.manualTab.table.removeRow(numberOfRows - row)
+                match fileName[0].split(".")[-1]:
+                    case "json":
+                        try:
+                            energy, Detectors, ROIsTable = files.importJSON(fileName[0])
+                            self.energy = (
+                                energy / 1000 if energy is not None else energy
+                            )
+                            self.xrfTab.changeEnergy(energy)
+                            self.Detectors = Detectors
+                            layout = self.manualTab.layout()
+                            if layout is not None:
+                                layout.removeWidget(self.manualTab.table)
+                                self.manualTab.table.deleteLater()
+                                self.manualTab.table = manual.ROIsTable(
+                                    self.Detectors, parent=self.manualTab
+                                )
+                                layout.addWidget(self.manualTab.table)
+                            for ROIName, ROIData in ROIsTable.items():
+                                self.manualTab.table.addROI(
+                                    ROIName,
+                                    ROIData,
+                                    True,
+                                    parent=self.manualTab,
+                                )
+                        except Exception as e:
+                            QtWidgets.QMessageBox.warning(
+                                self,
+                                "Import data",
+                                f"An error occurred during importing data:\n\n{e}",
+                            )
+                        else:
+                            QtWidgets.QMessageBox.information(
+                                self,
+                                "Import data",
+                                f"Data was succesfully imported from file:\n\n{fileName[0]}",
+                            )
+                    case "txt" | "csv":
+                        try:
+                            pass
+                        except Exception as e:
+                            QtWidgets.QMessageBox.warning(
+                                self,
+                                "Import data",
+                                f"An error occurred during importing data:\n\n{e}",
+                            )
+                        else:
+                            QtWidgets.QMessageBox.information(
+                                self,
+                                "Import data",
+                                f"Data was succesfully imported from file:\n\n{fileName[0]}",
+                            )
+                    case _:
+                        return
 
     def exportTriggered(self):
         """
@@ -209,9 +282,17 @@ class MainWindow(QtWidgets.QMainWindow):
             == QtWidgets.QMessageBox.StandardButton.Yes
         ):
             self.xrfTab.uncheckAll()
-            numberOfRows = self.manualTab.table.rowCount()
-            for row in range(numberOfRows + 1):
-                self.manualTab.table.removeRow(numberOfRows - row)
+            self.energy = self.defaultEnergy
+            self.xrfTab.changeEnergy(self.energy)
+            self.Detectors = self.defaultDetectors
+            layout = self.manualTab.layout()
+            if layout is not None:
+                layout.removeWidget(self.manualTab.table)
+                self.manualTab.table.deleteLater()
+                self.manualTab.table = manual.ROIsTable(
+                    self.Detectors, parent=self.manualTab
+                )
+                layout.addWidget(self.manualTab.table)
 
 
 class Detector:

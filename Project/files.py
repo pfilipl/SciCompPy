@@ -20,6 +20,31 @@ import main
 
 # --- --- CODE --- --- #
 
+def importJSON(fileName):
+    """
+    Function for importing data from JSON file with specified name.
+
+    It returns data from JSON file with information about:
+    excitation energy, detectors' properties, and defined ROIs.
+    """
+
+    with open(fileName, "r") as file:
+        Data = json.loads(file.read())
+    
+    Detectors = {}
+    for detName, detParameters in Data["Detectors"].items():
+        Detectors[detName] = main.Detector(
+            detParameters["Zero [eV]"],
+            detParameters["Gain [eV/channel]"],
+            detParameters["Noise [eV]"],
+            detParameters["Fano [-]"],
+            detParameters["Epsilon [eV]"],
+            detParameters["N [-]"],
+        )
+
+    return Data["Excitation energy [eV]"], Detectors, Data["ROIsTable"]
+
+
 def exportJSON(fileName, /, energy, Detectors, ROIsTable):
     """
     Function for exporting JSON file with specified name.
@@ -51,7 +76,7 @@ def exportJSON(fileName, /, energy, Detectors, ROIsTable):
             }
         },
         "ROIsTable": {
-            "Mn_Ka": {
+            "Mn_Kα": {
             "Min energy [eV]": "5823",
             "Max energy [eV]": "5967",
             "SDD1 Min channel": "931",
@@ -59,7 +84,7 @@ def exportJSON(fileName, /, energy, Detectors, ROIsTable):
             "SDD2 Min channel": "931",
             "SDD2 Max channel": "951"
             },
-            "Au_La": {
+            "Au_Lα": {
             "Min energy [eV]": "9631",
             "Max energy [eV]": "9777",
             "SDD1 Min channel": "1478",
@@ -67,7 +92,7 @@ def exportJSON(fileName, /, energy, Detectors, ROIsTable):
             "SDD2 Min channel": "1478",
             "SDD2 Max channel": "1499"
             },
-            "U_Ma1": {
+            "U_Mα1": {
             "Min energy [eV]": "3100",
             "Max energy [eV]": "3242",
             "SDD1 Min channel": "539",

@@ -95,7 +95,7 @@ class ROIsTable(QtWidgets.QTableWidget):
             selectedRows = list(set([item.row() for item in self.selectedItems()]))
             for row in sorted(selectedRows, reverse=True):
                 self.deleteROI(row, parent)
-                
+
         self.installEventFilter(
             EventFilter(
                 QtGui.QKeyEvent(
@@ -109,17 +109,63 @@ class ROIsTable(QtWidgets.QTableWidget):
             )
         )
 
-    def addROI(self):
+    def addROI(self, ROIName, ROIData, importing=False, /, parent=None):
         """
         Method for adding manual ROI.
 
-        It adds a row to ROIs table with name, energy range,
-        and channel range for specified detectors.
+        It adds a row to ROIs table with ROIName, and ROIData
+        including energy range, and channel range for specified detectors.
         """
 
-        pass
+        if importing:
+            try:
+                name, tabName = ROIName.split("_")
+                if (
+                    name in periodic_table.Elements.keys()
+                    and tabName in ["Kα", "Kβ", "Lα", "Lβ", "Mα1"]
+                    and parent is not None
+                ):
+                    parent.checkElement.emit(True, name, tabName)
+                else:
+                    self.insertRow(self.rowCount())
+                    self.setItem(
+                        self.rowCount() - 1, 0, QtWidgets.QTableWidgetItem(ROIName)
+                    )
+                    for ikey, key in enumerate(ROIData.keys()):
+                        self.setItem(
+                            self.rowCount() - 1,
+                            1 + ikey,
+                            QtWidgets.QTableWidgetItem(ROIData[key]),
+                        )
+            except Exception:
+                self.insertRow(self.rowCount())
+                self.setItem(
+                    self.rowCount() - 1, 0, QtWidgets.QTableWidgetItem(ROIName)
+                )
+                for ikey, key in enumerate(ROIData.keys()):
+                    self.setItem(
+                        self.rowCount() - 1,
+                        1 + ikey,
+                        QtWidgets.QTableWidgetItem(ROIData[key]),
+                    )
+        else:
+            # self.insertRow(self.rowCount())
+            # self.setItem(self.rowCount() - 1, 0, QtWidgets.QTableWidgetItem(ROIName))
+            pass
 
-    def deleteROI(self, row, parent=None):
+        # --- text alignment --- #
+        # for item in (
+        #     self.item(self.rowCount() - 1, column)
+        #     for column in range(self.columnCount() - 1)
+        # ):
+        for item in (
+            self.item(self.rowCount() - 1, column)
+            for column in range(self.columnCount())
+        ):
+            if item is not None:
+                item.setTextAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+    def deleteROI(self, row, /, parent=None):
         """
         Method for deleting manual ROI.
 
