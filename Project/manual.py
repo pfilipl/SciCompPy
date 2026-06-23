@@ -15,10 +15,11 @@ from statistics import fmean
 
 # --- 3rd party libraries --- #
 import xraylib
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore, QtGui
 
 # --- own files --- #
 import main
+import periodic_table
 
 
 # --- --- CODE --- --- #
@@ -30,6 +31,8 @@ class Manual(QtWidgets.QWidget):
     Manual tab widget for ROIs configuration,
     theirs parameters visualisation, importing, and exporting.
     """
+
+    checkElement = QtCore.Signal(bool, str, str)
 
     def __init__(self, Detectors={}, /, parent=None):
         """
@@ -87,6 +90,60 @@ class ROIsTable(QtWidgets.QTableWidget):
         # self.setHorizontalHeaderItem(3 + 2 * len(self.Detectors), QtWidgets.QTableWidgetItem(""))
         # self.horizontalHeader().setStretchLastSection(True)
 
+        # --- 'Delete' key press detection --- #
+        def eventFilterMethod():
+            selectedRows = list(set([item.row() for item in self.selectedItems()]))
+            for row in sorted(selectedRows, reverse=True):
+                self.deleteROI(row, parent)
+                
+        self.installEventFilter(
+            EventFilter(
+                QtGui.QKeyEvent(
+                    QtCore.QEvent.Type.KeyPress,
+                    QtCore.Qt.Key.Key_Delete,
+                    QtCore.Qt.KeyboardModifier.NoModifier,
+                    "\u007f",
+                ),
+                eventFilterMethod,
+                self,
+            )
+        )
+
+    def addROI(self):
+        """
+        Method for adding manual ROI.
+
+        It adds a row to ROIs table with name, energy range,
+        and channel range for specified detectors.
+        """
+
+        pass
+
+    def deleteROI(self, row, parent=None):
+        """
+        Method for deleting manual ROI.
+
+        It deletes a 'row' form ROIs table and uncheck element's button
+        if corresponding ROI is standard element's line ROI.
+        """
+
+        ROI = self.item(row, 0)
+        if ROI is not None:
+            try:
+                name, tabName = ROI.text().split("_")
+                if (
+                    name in periodic_table.Elements.keys()
+                    and tabName in ["Kα", "Kβ", "Lα", "Lβ", "Mα1"]
+                    and parent is not None
+                ):
+                    parent.checkElement.emit(False, name, tabName)
+                else:
+                    self.removeRow(row)
+            except Exception:
+                self.removeRow(row)
+        else:
+            self.removeRow(row)
+
     def getElementROIName(self, name, line):
         """
         Method for creating standard element's line ROI name.
@@ -96,15 +153,15 @@ class ROIsTable(QtWidgets.QTableWidget):
 
         match line:
             case xraylib.KA_LINE:
-                return name + "_Ka"
+                return name + "_Kα"
             case xraylib.KB_LINE:
-                return name + "_Kb"
+                return name + "_Kβ"
             case xraylib.LA_LINE:
-                return name + "_La"
+                return name + "_Lα"
             case xraylib.LB_LINE:
-                return name + "_Lb"
+                return name + "_Lβ"
             case xraylib.MA1_LINE:
-                return name + "_Ma1"
+                return name + "_Mα1"
             case _:
                 return name
 
@@ -224,6 +281,33 @@ class ROIsTable(QtWidgets.QTableWidget):
             ROIs.append(dict(zip(ROIsTableHeaders, ROI)))
 
         return json.dumps(dict(zip(ROIsTableNames, ROIs)))
+
+
+class EventFilter(QtCore.QObject):
+    """
+    Event filter object for filtering events
+    and executing assigned to them methods.
+    """
+
+    def __init__(self, filter, method, /, parent=None):
+        """
+        Object initialization with specified filter and method.
+        """
+
+        super().__init__(parent)
+
+        self.filter = filter
+        self.method = method
+
+    def eventFilter(self, widget, event):
+        """
+        Overwrited method for filtering events
+        and executing assigned methods.
+        """
+
+        if event.__repr__() == self.filter.__repr__():
+            self.method()
+        return False
 
 
 # --- --- EXECUTABLE --- --- #

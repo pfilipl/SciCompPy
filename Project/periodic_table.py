@@ -176,12 +176,12 @@ class PeriodicTables(QtWidgets.QTabWidget):
         Method for changing excitation energy.
 
         It enables buttons in every defined periodic table widget
-        which element's energies are defined, and its absorption energy 
+        which element's energies are defined, and its absorption energy
         is not greater than specified 'energy' [eV].
         """
 
         if energy is not None:
-            energy /= 1000 # [eV] -> [keV] for xraylib
+            energy /= 1000  # [eV] -> [keV] for xraylib
         for periodicTable in self.Tabs.values():
             periodicTable.elementButtonsEnabling(energy)
 
@@ -194,6 +194,22 @@ class PeriodicTables(QtWidgets.QTabWidget):
         for periodicTable in self.Tabs.values():
             periodicTable.elementButtonsUncheck()
 
+    def checkElement(self, checked, name, tabName):
+        """ 
+        Slot for manualTab signal 'checkElement'.
+
+        It sets 'checked' state for element's button with specified 'name'
+        in periodic table specified by 'tabName'.
+        """
+
+        try:
+            self.Tabs[tabName].elementButtons[name].setChecked(checked)
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(
+                self,
+                "Checking element's button",
+                f"An error occurred during checking element's button:\n\n{e}",
+            )
 
 class PeriodicTable(QtWidgets.QWidget):
     """
@@ -249,7 +265,11 @@ class PeriodicTable(QtWidgets.QWidget):
             self.elementButtons[element] = Element(element)
             self.elementButtons[element].hover.connect(self.elementButtonHover)
             if parent is not None:
-                self.elementButtons[element].toggled.connect(lambda checked, name=element: parent.elementToggled.emit(checked, name, self.line))
+                self.elementButtons[element].toggled.connect(
+                    lambda checked, name=element: parent.elementToggled.emit(
+                        checked, name, self.line
+                    )
+                )
             layout.addWidget(self.elementButtons[element], period, group)
             match element:
                 case "H":

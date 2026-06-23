@@ -83,6 +83,11 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # --- manual tab --- #
         self.manualTab = manual.Manual(self.Detectors, parent=self)
+        self.manualTab.checkElement.connect(
+            lambda checked, name, tabName: self.xrfTab.checkElement(
+                checked, name, tabName
+            )
+        )
         mainWidget.addTab(self.manualTab, "Manual")
 
         # --- --- toolbar --- --- #
