@@ -121,12 +121,9 @@ class ROIsTable(QtWidgets.QTableWidget):
             Z = xraylib.SymbolToAtomicNumber(name)
             energy = xraylib.LineEnergy(Z, line) * 1000
         except Exception as e:
-            QtWidgets.QMessageBox(
-                QtWidgets.QMessageBox.Icon.Warning,
-                "ROI adding",
-                f"An error occurred during adding a ROI:\n\n{e}",
-                buttons=QtWidgets.QMessageBox.StandardButton.Ok,
-            ).exec()
+            QtWidgets.QMessageBox.warning(
+                self, "ROI adding", f"An error occurred during adding a ROI:\n\n{e}"
+            )
             return
 
         # --- --- creating ROI --- --- #

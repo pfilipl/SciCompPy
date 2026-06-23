@@ -158,36 +158,32 @@ class MainWindow(QtWidgets.QMainWindow):
                         fileName[0], self.energy, self.Detectors, self.manualTab.table
                     )
                 except Exception as e:
-                    QtWidgets.QMessageBox(
-                        QtWidgets.QMessageBox.Icon.Warning,
+                    QtWidgets.QMessageBox.warning(
+                        self,
                         "Export data",
                         f"An error occurred during exporting data:\n\n{e}",
-                        buttons=QtWidgets.QMessageBox.StandardButton.Ok,
-                    ).exec()
+                    )
                 else:
-                    QtWidgets.QMessageBox(
-                        QtWidgets.QMessageBox.Icon.Information,
+                    QtWidgets.QMessageBox.information(
+                        self,
                         "Export data",
                         f"Data was succesfully exported to file:\n\n{fileName[0]}",
-                        buttons=QtWidgets.QMessageBox.StandardButton.Ok,
-                    ).exec()
+                    )
             case "txt" | "csv":
                 try:
                     pass
                 except Exception as e:
-                    QtWidgets.QMessageBox(
-                        QtWidgets.QMessageBox.Icon.Warning,
+                    QtWidgets.QMessageBox.warning(
+                        self,
                         "Export data",
                         f"An error occurred during exporting data:\n\n{e}",
-                        buttons=QtWidgets.QMessageBox.StandardButton.Ok,
-                    ).exec()
+                    )
                 else:
-                    QtWidgets.QMessageBox(
-                        QtWidgets.QMessageBox.Icon.Information,
+                    QtWidgets.QMessageBox.information(
+                        self,
                         "Export data",
                         f"Data was succesfully exported to file:\n\n{fileName[0]}",
-                        buttons=QtWidgets.QMessageBox.StandardButton.Ok,
-                    ).exec()
+                    )
             case _:
                 return
 
