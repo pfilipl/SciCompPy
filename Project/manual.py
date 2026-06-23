@@ -45,6 +45,7 @@ class Manual(QtWidgets.QWidget):
         layout_form = QtWidgets.QGridLayout()
         layout.addLayout(layout_form)
         self.table = ROIsTable(Detectors, parent=self)
+        self.table.cellChanged.connect(lambda row, column: self.ROIChanged(row, column))
         layout.addWidget(self.table)
         self.setLayout(layout)
 
@@ -59,6 +60,20 @@ class Manual(QtWidgets.QWidget):
             self.table.addElementROI(name, line)
         else:
             self.table.deleteElementROI(name, line)
+    
+    def ROIChanged(self, row, column):
+        """
+        Slot for ROIs table signal 'cellChanged'.
+
+        It adds '_edited' to ROI's name if ROI's parametres was changed.
+        """
+
+        if column > 0:
+            changedIitem = self.table.item(row, column)
+            nameItem = self.table.item(row, 0)
+            if changedIitem in self.table.selectedItems() and nameItem is not None:
+                if nameItem.text().split("_")[-1] != "edited":
+                    nameItem.setText(nameItem.text() + "_edited")
 
 
 class ROIsTable(QtWidgets.QTableWidget):
