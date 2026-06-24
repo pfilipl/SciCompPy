@@ -81,7 +81,7 @@ class Manual(QtWidgets.QWidget):
             QtWidgets.QSizePolicy.Policy.Preferred,
             QtWidgets.QSizePolicy.Policy.Expanding,
         )
-        self.manualLine.editingFinished.connect(self.manualLineRadio.toggle)
+        self.manualLine.returnPressed.connect(self.manualLineRadio.toggle)
 
         # widht by sigma radio #
         self.manualWidthSigmaRadio = QtWidgets.QRadioButton()
@@ -95,8 +95,8 @@ class Manual(QtWidgets.QWidget):
         self.manualWidthSigma = QtWidgets.QDoubleSpinBox(
             prefix="± ", suffix=" σ", minimum=0.0, value=0.5, maximum=5, singleStep=0.01
         )
-        self.manualWidthSigma.editingFinished.connect(self.manualLineRadio.toggle)
-        self.manualWidthSigma.editingFinished.connect(self.manualWidthSigmaRadio.toggle)
+        self.manualWidthSigma.returnPressed.connect(self.manualLineRadio.toggle)
+        self.manualWidthSigma.returnPressed.connect(self.manualWidthSigmaRadio.toggle)
 
         # width by energy radio #
         self.manualWidthEnergyRadio = QtWidgets.QRadioButton()
@@ -109,8 +109,8 @@ class Manual(QtWidgets.QWidget):
         self.manualWidthEnergy = QtWidgets.QSpinBox(
             prefix="± ", suffix=" eV", minimum=0, value=50, maximum=50000
         )
-        self.manualWidthEnergy.editingFinished.connect(self.manualLineRadio.toggle)
-        self.manualWidthEnergy.editingFinished.connect(self.manualWidthEnergyRadio.toggle)
+        self.manualWidthEnergy.returnPressed.connect(self.manualLineRadio.toggle)
+        self.manualWidthEnergy.returnPressed.connect(self.manualWidthEnergyRadio.toggle)
 
         # energy range radio #
         self.manualEnergyRangeRadio = QtWidgets.QRadioButton("Energy range")
@@ -126,13 +126,13 @@ class Manual(QtWidgets.QWidget):
         self.manualEnergyRangeMin = QtWidgets.QSpinBox(
             prefix="Emin = ", suffix=" eV", minimum=0, maximum=100000
         )
-        self.manualEnergyRangeMin.editingFinished.connect(self.manualEnergyRangeRadio.toggle)
+        self.manualEnergyRangeMin.returnPressed.connect(self.manualEnergyRangeRadio.toggle)
 
         # energy range maximum #
         self.manualEnergyRangeMax = QtWidgets.QSpinBox(
             prefix="Emax = ", suffix=" eV", minimum=0, maximum=100000
         )
-        self.manualEnergyRangeMax.editingFinished.connect(self.manualEnergyRangeRadio.toggle)
+        self.manualEnergyRangeMax.returnPressed.connect(self.manualEnergyRangeRadio.toggle)
 
         # add ROI button #
         self.manualAddROI = QtWidgets.QPushButton("Add\nROI")

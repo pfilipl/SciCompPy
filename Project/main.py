@@ -301,6 +301,16 @@ class MainWindow(QtWidgets.QMainWindow):
             self.energy = self.defaultEnergy
             self.xrfTab.changeEnergy(self.energy)
             self.Detectors = self.defaultDetectors
+
+            self.manualTab.manualName.setText("")
+            self.manualTab.manualLine.setValue(0)
+            self.manualTab.manualWidthSigma.setValue(0.5)
+            self.manualTab.manualWidthEnergy.setValue(0)
+            self.manualTab.manualEnergyRangeMin.setValue(0)
+            self.manualTab.manualEnergyRangeMax.setValue(0)
+            self.manualTab.manualLineRadio.toggle()
+            self.manualTab.manualWidthSigmaRadio.toggle()
+
             layout = self.manualTab.layout()
             if layout is not None:
                 layout.removeWidget(self.manualTab.table)
