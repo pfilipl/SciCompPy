@@ -48,6 +48,11 @@ class Manual(QtWidgets.QWidget):
         layout.addLayout(layout_form)
 
         # --- manual form --- #
+        # radio buttons groups #
+        self.manualDefyingType = QtWidgets.QButtonGroup(self, exclusive=True)
+        self.manualWidthType = QtWidgets.QButtonGroup(self, exclusive=True)
+
+        # name #
         self.manualName = QtWidgets.QLineEdit(
             placeholderText="Name...", alignment=QtCore.Qt.AlignmentFlag.AlignCenter
         )
@@ -59,13 +64,16 @@ class Manual(QtWidgets.QWidget):
             QtGui.QFont(self.font().family(), ceil(self.font().pointSize() * 1.5))
         )
 
+        # line and width radio #
         self.manualLineRadio = QtWidgets.QRadioButton("Line and width")
         self.manualLineRadio.setLayoutDirection(QtCore.Qt.LayoutDirection.RightToLeft)
         self.manualLineRadio.setSizePolicy(
             QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
         )
         self.manualLineRadio.setChecked(True)
+        self.manualDefyingType.addButton(self.manualLineRadio)
 
+        # line #
         self.manualLine = QtWidgets.QSpinBox(
             prefix="E = ", suffix=" eV", minimum=0, maximum=100000
         )
@@ -73,24 +81,38 @@ class Manual(QtWidgets.QWidget):
             QtWidgets.QSizePolicy.Policy.Preferred,
             QtWidgets.QSizePolicy.Policy.Expanding,
         )
+        self.manualLine.editingFinished.connect(self.manualLineRadio.toggle)
 
+        # widht by sigma radio #
         self.manualWidthSigmaRadio = QtWidgets.QRadioButton()
         self.manualWidthSigmaRadio.setSizePolicy(
             QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
         )
         self.manualWidthSigmaRadio.setChecked(True)
+        self.manualWidthType.addButton(self.manualWidthSigmaRadio)
+                
+        # widht by sigma #
         self.manualWidthSigma = QtWidgets.QDoubleSpinBox(
             prefix="± ", suffix=" σ", minimum=0.0, value=0.5, maximum=5, singleStep=0.01
         )
+        self.manualWidthSigma.editingFinished.connect(self.manualLineRadio.toggle)
+        self.manualWidthSigma.editingFinished.connect(self.manualWidthSigmaRadio.toggle)
 
+        # width by energy radio #
         self.manualWidthEnergyRadio = QtWidgets.QRadioButton()
         self.manualWidthEnergyRadio.setSizePolicy(
             QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
         )
+        self.manualWidthType.addButton(self.manualWidthEnergyRadio)
+        
+        # width by energy #
         self.manualWidthEnergy = QtWidgets.QSpinBox(
             prefix="± ", suffix=" eV", minimum=0, value=50, maximum=50000
         )
+        self.manualWidthEnergy.editingFinished.connect(self.manualLineRadio.toggle)
+        self.manualWidthEnergy.editingFinished.connect(self.manualWidthEnergyRadio.toggle)
 
+        # energy range radio #
         self.manualEnergyRangeRadio = QtWidgets.QRadioButton("Energy range")
         self.manualEnergyRangeRadio.setLayoutDirection(
             QtCore.Qt.LayoutDirection.RightToLeft
@@ -98,13 +120,21 @@ class Manual(QtWidgets.QWidget):
         self.manualEnergyRangeRadio.setSizePolicy(
             QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
         )
+        self.manualDefyingType.addButton(self.manualEnergyRangeRadio)
+        
+        # energy range minimum #
         self.manualEnergyRangeMin = QtWidgets.QSpinBox(
             prefix="Emin = ", suffix=" eV", minimum=0, maximum=100000
         )
+        self.manualEnergyRangeMin.editingFinished.connect(self.manualEnergyRangeRadio.toggle)
+
+        # energy range maximum #
         self.manualEnergyRangeMax = QtWidgets.QSpinBox(
             prefix="Emax = ", suffix=" eV", minimum=0, maximum=100000
         )
+        self.manualEnergyRangeMax.editingFinished.connect(self.manualEnergyRangeRadio.toggle)
 
+        # add ROI button #
         self.manualAddROI = QtWidgets.QPushButton("Add\nROI")
         self.manualAddROI.setFont(
             QtGui.QFont(self.font().family(), ceil(self.font().pointSize() * 1.5))
@@ -115,6 +145,7 @@ class Manual(QtWidgets.QWidget):
         )
         self.manualAddROI.pressed.connect(self.pressManualAddROI)
 
+        # placing widgets in layout grid #
         layout_form.addWidget(self.manualName, 1, 0, 3, 2)
         layout_form.addWidget(self.manualLineRadio, 1, 3, 2, 1)
         layout_form.addWidget(self.manualLine, 1, 4, 2, 1)
