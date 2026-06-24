@@ -177,6 +177,16 @@ class MainWindow(QtWidgets.QMainWindow):
                             )
                             self.xrfTab.changeEnergy(energy)
                             self.Detectors = Detectors
+
+                            if self.Detectors == {}:
+                                self.manualTab.manualWidthSigmaRadio.setEnabled(False)
+                                self.manualTab.manualWidthSigma.setEnabled(False)
+                                self.manualTab.manualWidthEnergyRadio.toggle()
+                            else:
+                                self.manualTab.manualWidthSigmaRadio.setEnabled(True)
+                                self.manualTab.manualWidthSigma.setEnabled(True)
+                                self.manualTab.manualWidthSigmaRadio.toggle()
+
                             layout = self.manualTab.layout()
                             if layout is not None:
                                 layout.removeWidget(self.manualTab.table)
@@ -309,7 +319,14 @@ class MainWindow(QtWidgets.QMainWindow):
             self.manualTab.manualEnergyRangeMin.setValue(0)
             self.manualTab.manualEnergyRangeMax.setValue(0)
             self.manualTab.manualLineRadio.toggle()
-            self.manualTab.manualWidthSigmaRadio.toggle()
+            if self.Detectors == {}:
+                self.manualTab.manualWidthSigmaRadio.setEnabled(False)
+                self.manualTab.manualWidthSigma.setEnabled(False)
+                self.manualTab.manualWidthEnergyRadio.toggle()
+            else:
+                self.manualTab.manualWidthSigmaRadio.setEnabled(True)
+                self.manualTab.manualWidthSigma.setEnabled(True)
+                self.manualTab.manualWidthSigmaRadio.toggle()
 
             layout = self.manualTab.layout()
             if layout is not None:

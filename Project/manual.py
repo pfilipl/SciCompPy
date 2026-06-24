@@ -88,15 +88,20 @@ class Manual(QtWidgets.QWidget):
         self.manualWidthSigmaRadio.setSizePolicy(
             QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
         )
-        self.manualWidthSigmaRadio.setChecked(True)
         self.manualWidthType.addButton(self.manualWidthSigmaRadio)
-                
+        if Detectors == {}:
+            self.manualWidthSigmaRadio.setEnabled(False)
+        else:
+            self.manualWidthSigmaRadio.setChecked(True)
+
         # widht by sigma #
         self.manualWidthSigma = QtWidgets.QDoubleSpinBox(
             prefix="± ", suffix=" σ", minimum=0.0, value=0.5, maximum=5, singleStep=0.01
         )
         self.manualWidthSigma.returnPressed.connect(self.manualLineRadio.toggle)
         self.manualWidthSigma.returnPressed.connect(self.manualWidthSigmaRadio.toggle)
+        if Detectors == {}:
+            self.manualWidthSigma.setEnabled(False)
 
         # width by energy radio #
         self.manualWidthEnergyRadio = QtWidgets.QRadioButton()
@@ -104,7 +109,9 @@ class Manual(QtWidgets.QWidget):
             QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
         )
         self.manualWidthType.addButton(self.manualWidthEnergyRadio)
-        
+        if Detectors == {}:
+            self.manualWidthEnergyRadio.setChecked(True)
+
         # width by energy #
         self.manualWidthEnergy = QtWidgets.QSpinBox(
             prefix="± ", suffix=" eV", minimum=0, value=50, maximum=50000
@@ -121,18 +128,22 @@ class Manual(QtWidgets.QWidget):
             QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
         )
         self.manualDefyingType.addButton(self.manualEnergyRangeRadio)
-        
+
         # energy range minimum #
         self.manualEnergyRangeMin = QtWidgets.QSpinBox(
             prefix="Emin = ", suffix=" eV", minimum=0, maximum=100000
         )
-        self.manualEnergyRangeMin.returnPressed.connect(self.manualEnergyRangeRadio.toggle)
+        self.manualEnergyRangeMin.returnPressed.connect(
+            self.manualEnergyRangeRadio.toggle
+        )
 
         # energy range maximum #
         self.manualEnergyRangeMax = QtWidgets.QSpinBox(
             prefix="Emax = ", suffix=" eV", minimum=0, maximum=100000
         )
-        self.manualEnergyRangeMax.returnPressed.connect(self.manualEnergyRangeRadio.toggle)
+        self.manualEnergyRangeMax.returnPressed.connect(
+            self.manualEnergyRangeRadio.toggle
+        )
 
         # add ROI button #
         self.manualAddROI = QtWidgets.QPushButton("Add\nROI")
@@ -203,7 +214,17 @@ class Manual(QtWidgets.QWidget):
         """
 
         ROIName = self.manualName.text()
-        ROIData = {}
+        ROIData = {
+            "DefyingType": "line" if self.manualLineRadio.isChecked() else "range",
+            "WidthType": "sigma"
+            if self.manualWidthSigmaRadio.isChecked()
+            else "energy",
+            "Line": self.manualLine.value(),
+            "WidthSigma": self.manualWidthSigma.value(),
+            "WidthEnergy": self.manualWidthEnergy.value(),
+            "EnergyRangeMin": self.manualEnergyRangeMin.value(),
+            "EnergyRangeMax": self.manualEnergyRangeMax.value(),
+        }
         self.table.addROI(ROIName, ROIData, parent=self)
 
 
@@ -295,9 +316,20 @@ class ROIsTable(QtWidgets.QTableWidget):
                     )
                     self.setItem(self.rowCount() - 1, 1 + ikey, tempItem)
         else:
-            # self.insertRow(self.rowCount())
-            # self.setItem(self.rowCount() - 1, 0, QtWidgets.QTableWidgetItem(ROIName))
-            print(ROIName, ROIData)
+            try:
+                name, tabName = ROIName.split("_")
+                if (
+                    name in periodic_table.Elements.keys()
+                    and tabName in ["Kα", "Kβ", "Lα", "Lβ", "Mα1"]
+                ):
+                    ROIName += "_manual"
+            except Exception:
+                pass
+            
+            self.insertRow(self.rowCount())
+            self.setItem(
+                self.rowCount() - 1, 0, QtWidgets.QTableWidgetItem(ROIName)
+            )
 
         # --- text alignment --- #
         # for item in (
