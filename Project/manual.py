@@ -49,7 +49,7 @@ class Manual(QtWidgets.QWidget):
 
         # --- manual form --- #
         # radio buttons groups #
-        self.manualDefyingType = QtWidgets.QButtonGroup(self, exclusive=True)
+        self.manualDefiningType = QtWidgets.QButtonGroup(self, exclusive=True)
         self.manualWidthType = QtWidgets.QButtonGroup(self, exclusive=True)
 
         # name #
@@ -71,7 +71,7 @@ class Manual(QtWidgets.QWidget):
             QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
         )
         self.manualLineRadio.setChecked(True)
-        self.manualDefyingType.addButton(self.manualLineRadio)
+        self.manualDefiningType.addButton(self.manualLineRadio)
 
         # line #
         self.manualLine = QtWidgets.QSpinBox(
@@ -83,7 +83,7 @@ class Manual(QtWidgets.QWidget):
         )
         self.manualLine.returnPressed.connect(self.manualLineRadio.toggle)
 
-        # widht by sigma radio #
+        # width by sigma radio #
         self.manualWidthSigmaRadio = QtWidgets.QRadioButton()
         self.manualWidthSigmaRadio.setSizePolicy(
             QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
@@ -94,7 +94,7 @@ class Manual(QtWidgets.QWidget):
         else:
             self.manualWidthSigmaRadio.setChecked(True)
 
-        # widht by sigma #
+        # width by sigma #
         self.manualWidthSigma = QtWidgets.QDoubleSpinBox(
             prefix="± ", suffix=" σ", minimum=0.0, value=0.5, maximum=5, singleStep=0.01
         )
@@ -127,7 +127,7 @@ class Manual(QtWidgets.QWidget):
         self.manualEnergyRangeRadio.setSizePolicy(
             QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Preferred
         )
-        self.manualDefyingType.addButton(self.manualEnergyRangeRadio)
+        self.manualDefiningType.addButton(self.manualEnergyRangeRadio)
 
         # energy range minimum #
         self.manualEnergyRangeMin = QtWidgets.QSpinBox(
@@ -215,7 +215,7 @@ class Manual(QtWidgets.QWidget):
 
         ROIName = self.manualName.text()
         ROIData = {
-            "DefyingType": "line" if self.manualLineRadio.isChecked() else "range",
+            "DefiningType": "line" if self.manualLineRadio.isChecked() else "range",
             "WidthType": "sigma"
             if self.manualWidthSigmaRadio.isChecked()
             else "energy",
@@ -225,7 +225,13 @@ class Manual(QtWidgets.QWidget):
             "EnergyRangeMin": self.manualEnergyRangeMin.value(),
             "EnergyRangeMax": self.manualEnergyRangeMax.value(),
         }
-        self.table.addROI(ROIName, ROIData, parent=self)
+
+        try:
+            self.table.addROI(ROIName, ROIData, parent=self)
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(
+                self, "ROI adding", f"An error occurred during adding a ROI:\n\n{e}"
+            )
 
 
 class ROIsTable(QtWidgets.QTableWidget):
@@ -284,6 +290,7 @@ class ROIsTable(QtWidgets.QTableWidget):
         including energy range, and channel range for specified detectors.
         """
 
+        # --- --- importing --- --- #
         if importing:
             try:
                 name, tabName = ROIName.split("_")
@@ -315,21 +322,133 @@ class ROIsTable(QtWidgets.QTableWidget):
                         QtCore.Qt.ItemDataRole.DisplayRole, int(ROIData[key])
                     )
                     self.setItem(self.rowCount() - 1, 1 + ikey, tempItem)
+        
+        # --- --- manual adding --- --- #
         else:
+            # --- ROI's name --- #
+            if ROIName == "":
+                ROIName = "ROI"
+
             try:
                 name, tabName = ROIName.split("_")
-                if (
-                    name in periodic_table.Elements.keys()
-                    and tabName in ["Kα", "Kβ", "Lα", "Lβ", "Mα1"]
-                ):
+                if name in periodic_table.Elements.keys() and tabName in [
+                    "Kα",
+                    "Kβ",
+                    "Lα",
+                    "Lβ",
+                    "Mα1",
+                ]:
                     ROIName += "_manual"
             except Exception:
                 pass
-            
-            self.insertRow(self.rowCount())
-            self.setItem(
-                self.rowCount() - 1, 0, QtWidgets.QTableWidgetItem(ROIName)
+
+            ROINameRegex = QtCore.QRegularExpression(
+                f"^{QtCore.QRegularExpression.escape(ROIName)}(?:_\\d+)?$"
             )
+            sameNameROIsNumber = len(
+                self.findItems(
+                    ROINameRegex.pattern(), QtCore.Qt.MatchFlag.MatchRegularExpression
+                )
+            )
+            if sameNameROIsNumber:
+                ROIName += f"_{sameNameROIsNumber}"
+
+            self.insertRow(self.rowCount())
+            self.setItem(self.rowCount() - 1, 0, QtWidgets.QTableWidgetItem(ROIName))
+
+            # --- adding by energy line --- #
+            if ROIData["DefiningType"] == "line":
+                energy = ROIData["Line"]
+
+                # ROI's width in channels #
+                if self.Detectors == {} or ROIData["WidthType"] == "energy":
+                    sigma = [ROIData["WidthEnergy"]]
+                elif self.Detectors != {} and ROIData["WidthType"] == "sigma":
+                    sigma = []
+                    for idetector, detector in enumerate(self.Detectors.values()):
+                        sigma.append(detector.getSigma(energy))
+                        tempItemMinus = QtWidgets.QTableWidgetItem()
+                        tempItemMinus.setData(
+                            QtCore.Qt.ItemDataRole.DisplayRole,
+                            int(
+                                detector.getChannel(
+                                    energy - sigma[-1] * 2.355 * ROIData["WidthSigma"]
+                                )
+                            ),
+                        )
+                        self.setItem(
+                            self.rowCount() - 1, 3 + idetector * 2, tempItemMinus
+                        )
+                        tempItemPlus = QtWidgets.QTableWidgetItem()
+                        tempItemPlus.setData(
+                            QtCore.Qt.ItemDataRole.DisplayRole,
+                            int(
+                                detector.getChannel(
+                                    energy + sigma[-1] * 2.355 * ROIData["WidthSigma"]
+                                )
+                            ),
+                        )
+                        self.setItem(
+                            self.rowCount() - 1, 3 + idetector * 2 + 1, tempItemPlus
+                        )
+                else:
+                    raise ValueError(
+                        f"Undefined WidthType while manual adding ROI: {ROIData['WidthType']!r}."
+                    )
+
+                # fmean ROI's width in energy #
+                tempItemMinus = QtWidgets.QTableWidgetItem()
+                tempItemMinus.setData(
+                    QtCore.Qt.ItemDataRole.DisplayRole,
+                    int(energy - fmean(sigma) * 2.355 * ROIData["WidthSigma"]),
+                )
+                self.setItem(self.rowCount() - 1, 1, tempItemMinus)
+                tempItemPlus = QtWidgets.QTableWidgetItem()
+                tempItemPlus.setData(
+                    QtCore.Qt.ItemDataRole.DisplayRole,
+                    int(energy + fmean(sigma) * 2.355 * ROIData["WidthSigma"]),
+                )
+                self.setItem(self.rowCount() - 1, 2, tempItemPlus)
+
+            # --- by energy range --- #
+            elif ROIData["DefiningType"] == "range":
+                energyMin = min(ROIData["EnergyRangeMin"], ROIData["EnergyRangeMax"])
+                energyMax = max(ROIData["EnergyRangeMin"], ROIData["EnergyRangeMax"])
+
+                # ROI's width in channels #
+                if self.Detectors != {}:
+                    for idetector, detector in enumerate(self.Detectors.values()):
+                        tempItemMinus = QtWidgets.QTableWidgetItem()
+                        tempItemMinus.setData(
+                            QtCore.Qt.ItemDataRole.DisplayRole,
+                            int(detector.getChannel(energyMin)),
+                        )
+                        self.setItem(
+                            self.rowCount() - 1, 3 + idetector * 2, tempItemMinus
+                        )
+                        tempItemPlus = QtWidgets.QTableWidgetItem()
+                        tempItemPlus.setData(
+                            QtCore.Qt.ItemDataRole.DisplayRole,
+                            int(detector.getChannel(energyMax)),
+                        )
+                        self.setItem(
+                            self.rowCount() - 1, 3 + idetector * 2 + 1, tempItemPlus
+                        )
+
+                # ROI's width in energy #
+                tempItemMinus = QtWidgets.QTableWidgetItem()
+                tempItemMinus.setData(
+                    QtCore.Qt.ItemDataRole.DisplayRole, int(energyMin)
+                )
+                self.setItem(self.rowCount() - 1, 1, tempItemMinus)
+                tempItemPlus = QtWidgets.QTableWidgetItem()
+                tempItemPlus.setData(QtCore.Qt.ItemDataRole.DisplayRole, int(energyMax))
+                self.setItem(self.rowCount() - 1, 2, tempItemPlus)
+
+            else:
+                raise ValueError(
+                    f"Undefined DefiningType while manual adding ROI: {ROIData['DefiningType']!r}."
+                )
 
         # --- text alignment --- #
         # for item in (
@@ -433,7 +552,7 @@ class ROIsTable(QtWidgets.QTableWidget):
                 )
                 self.setItem(self.rowCount() - 1, 3 + idetector * 2 + 1, tempItemPlus)
 
-        # --- fmean ROI's widht in energy --- #
+        # --- fmean ROI's width in energy --- #
         tempItemMinus = QtWidgets.QTableWidgetItem()
         tempItemMinus.setData(
             QtCore.Qt.ItemDataRole.DisplayRole, int(energy - fmean(sigma) * 2.355 / 2)
