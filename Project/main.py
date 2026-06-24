@@ -323,11 +323,19 @@ class MainWindow(QtWidgets.QMainWindow):
         Slot for closing the application.
         """
 
+        questionString = "Do you really want to quit?\nDefined ROIs will"
+        if self.returning == "vars":
+            questionString += " be returned as variables."
+        elif self.returning == "json":
+            questionString += " be returned as JSON string."
+        else:
+            questionString += " be lost."
+
         if (
             QtWidgets.QMessageBox.question(
                 self,
                 "Quit",
-                "Do you really want to quit?\nDefined ROIs will be lost.",
+                questionString,
                 defaultButton=QtWidgets.QMessageBox.StandardButton.No,
             )
             == QtWidgets.QMessageBox.StandardButton.Yes
@@ -459,7 +467,11 @@ def main():
     )
     parser.add_argument("-e", "--energy", required=False, help="excitation energy [eV]")
     parser.add_argument(
-        "-r", "--returning", required=False, choices= ["vars", "json"], help="returning data do console: 'vars' for variables, 'json' for JSON string"
+        "-r",
+        "--returning",
+        required=False,
+        choices=["vars", "json"],
+        help="returning data do console: 'vars' for variables, 'json' for JSON string",
     )
     args = parser.parse_args()
 
