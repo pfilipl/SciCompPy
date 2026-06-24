@@ -86,7 +86,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 checked, name, line
             )
         )
-        # mainWidget.addTab(self.xrfTab, "XRF lines")
+        mainWidget.addTab(self.xrfTab, "XRF lines")
 
         # --- manual tab --- #
         self.manualTab = manual.Manual(self.Detectors, parent=self)
@@ -96,7 +96,7 @@ class MainWindow(QtWidgets.QMainWindow):
             )
         )
         mainWidget.addTab(self.manualTab, "Manual")
-        mainWidget.addTab(self.xrfTab, "XRF lines")
+        # mainWidget.addTab(self.xrfTab, "XRF lines")
 
         # --- --- toolbar --- --- #
         toolbar = QtWidgets.QToolBar(
@@ -123,6 +123,25 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         exportAction.triggered.connect(self.exportTriggered)
         toolbar.addAction(exportAction)
+
+        # --- separator --- #
+        toolbar.addSeparator()
+
+        # --- detectors --- #
+        detectorsAction = QtGui.QAction(
+            QtGui.QIcon.fromTheme(QtGui.QIcon.ThemeIcon.DocumentProperties),
+            "Detectors",
+            self,
+        )
+        detectorsAction.setEnabled(False)
+        toolbar.addAction(detectorsAction)
+
+        # --- energy --- #
+        energyAction = QtGui.QAction(
+            QtGui.QIcon.fromTheme(QtGui.QIcon.ThemeIcon.WeatherClear), "Energy", self
+        )
+        energyAction.triggered.connect(self.energyTriggered)
+        toolbar.addAction(energyAction)
 
         # --- separator --- #
         toolbar.addWidget(
@@ -291,6 +310,17 @@ class MainWindow(QtWidgets.QMainWindow):
             case _:
                 return
 
+    def energyTriggered(self):
+        """
+        lot for toolbar's 'Energy' action signal 'triggered'.
+
+        It opens dialog for setting new excitation energy.
+        """
+
+        energyDialog = EnergyDialog(self)
+        if energyDialog.exec():
+            self.xrfTab.changeEnergy(energyDialog.energy.value())
+
     def resetTriggered(self):
         """
         Slot for toolbar's 'Reset' action signal 'triggered'.
@@ -386,6 +416,42 @@ class MainWindow(QtWidgets.QMainWindow):
                 )
         else:
             event.ignore()
+
+
+class EnergyDialog(QtWidgets.QDialog):
+    """
+    Custom dialog for changing excitation enrgy.
+    """
+
+    def __init__(self, /, parent=None):
+        """
+        Dialog initialization with layout and functionality configuration.
+        """
+
+        super().__init__(parent)
+
+        self.setWindowTitle("Energy")
+
+        buttons = (
+            QtWidgets.QDialogButtonBox.StandardButton.Ok
+            | QtWidgets.QDialogButtonBox.StandardButton.Cancel
+        )
+        self.buttonBox = QtWidgets.QDialogButtonBox(buttons, centerButtons=True)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        layout = QtWidgets.QVBoxLayout()
+        self.setLayout(layout)
+        layout.addWidget(QtWidgets.QLabel("Change excitation energy to:"))
+        self.energy = QtWidgets.QSpinBox(
+            self, prefix="E = ", suffix=" eV", minimum=0, maximum=100000
+        )
+        self.energy.setSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QtWidgets.QSizePolicy.Policy.Preferred,
+        )
+        layout.addWidget(self.energy)
+        layout.addWidget(self.buttonBox)
 
 
 class Detector:
