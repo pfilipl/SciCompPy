@@ -53,12 +53,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # --- variables --- #
         self.defaultDetectors = {"SDD1": Detector(), "SDD2": Detector()}
-        # self.Detectors = self.defaultDetectors
-        self.Detectors = {
-            "SDD1": Detector(),
-            "SDD2": Detector(-100, 5, 300, 0.01),
-            "SDD3": Detector(200, 3, 500, 0.01),
-        }
+        self.Detectors = self.defaultDetectors
+        # self.Detectors = {
+        #     "SDD1": Detector(),
+        #     "SDD2": Detector(-100, 5, 300, 0.01),
+        #     "SDD3": Detector(200, 3, 500, 0.01),
+        # }
         # self.Detectors = {}
 
         # --- --- layout --- --- #
@@ -180,7 +180,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 self,
                 "Export file",
                 "./Project/",
-                "JSON files (*.json);;Text files (*.txt *.csv)",
+                # "JSON files (*.json);;Text files (*.txt *.csv)",
+                "JSON files (*.json)",
             )
             if fileName[0]:
                 self.xrfTab.uncheckAll()
@@ -243,21 +244,21 @@ class MainWindow(QtWidgets.QMainWindow):
                                 "Import data",
                                 f"Data was succesfully imported from file:\n\n{fileName[0]}",
                             )
-                    case "txt" | "csv":
-                        try:
-                            pass
-                        except Exception as e:
-                            QtWidgets.QMessageBox.warning(
-                                self,
-                                "Import data",
-                                f"An error occurred during importing data:\n\n{e}",
-                            )
-                        else:
-                            QtWidgets.QMessageBox.information(
-                                self,
-                                "Import data",
-                                f"Data was succesfully imported from file:\n\n{fileName[0]}",
-                            )
+                    # case "txt" | "csv":
+                    #     try:
+                    #         pass
+                    #     except Exception as e:
+                    #         QtWidgets.QMessageBox.warning(
+                    #             self,
+                    #             "Import data",
+                    #             f"An error occurred during importing data:\n\n{e}",
+                    #         )
+                    #     else:
+                    #         QtWidgets.QMessageBox.information(
+                    #             self,
+                    #             "Import data",
+                    #             f"Data was succesfully imported from file:\n\n{fileName[0]}",
+                    #         )
                     case _:
                         return
 
@@ -272,7 +273,8 @@ class MainWindow(QtWidgets.QMainWindow):
             self,
             "Export file",
             "./Project/ROIs.json",
-            "JSON files (*.json);;Text files (*.txt *.csv)",
+            # "JSON files (*.json);;Text files (*.txt *.csv)",
+            "JSON files (*.json)",
         )
         match fileName[0].split(".")[-1]:
             case "json":
@@ -292,21 +294,21 @@ class MainWindow(QtWidgets.QMainWindow):
                         "Export data",
                         f"Data was succesfully exported to file:\n\n{fileName[0]}",
                     )
-            case "txt" | "csv":
-                try:
-                    pass
-                except Exception as e:
-                    QtWidgets.QMessageBox.warning(
-                        self,
-                        "Export data",
-                        f"An error occurred during exporting data:\n\n{e}",
-                    )
-                else:
-                    QtWidgets.QMessageBox.information(
-                        self,
-                        "Export data",
-                        f"Data was succesfully exported to file:\n\n{fileName[0]}",
-                    )
+            # case "txt" | "csv":
+            #     try:
+            #         pass
+            #     except Exception as e:
+            #         QtWidgets.QMessageBox.warning(
+            #             self,
+            #             "Export data",
+            #             f"An error occurred during exporting data:\n\n{e}",
+            #         )
+            #     else:
+            #         QtWidgets.QMessageBox.information(
+            #             self,
+            #             "Export data",
+            #             f"Data was succesfully exported to file:\n\n{fileName[0]}",
+            #         )
             case _:
                 return
 
