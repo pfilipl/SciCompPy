@@ -340,7 +340,9 @@ class MainWindow(QtWidgets.QMainWindow):
             == QtWidgets.QMessageBox.StandardButton.Yes
         ):
             self.xrfTab.uncheckAll()
-            self.energy = self.defaultEnergy
+            self.energy = (
+                self.defaultEnergy * 1000 if self.defaultEnergy is not None else None
+            )
             self.xrfTab.changeEnergy(self.energy)
             self.Detectors = self.defaultDetectors
 
@@ -560,7 +562,9 @@ def main():
         for X-ray Fluorescence spectra analysis.
         """,
     )
-    parser.add_argument("-e", "--energy", required=False, help="define excitation energy in eV")
+    parser.add_argument(
+        "-e", "--energy", required=False, help="define excitation energy in eV"
+    )
     parser.add_argument(
         "-r",
         "--returning",
