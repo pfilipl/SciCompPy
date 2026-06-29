@@ -69,6 +69,82 @@ If the user try to add a ROI with the name that already exists, the application 
 
 <img src="screenshots/manualTab_Cr-Au-ExampleROI-2.png">
 
-At every moment, defined ROIs can be exported to a JSON file or imported from a JSON file by pressing "Export" or "Import" buttons at the toolbar.
+At every moment, defined ROIs can be exported to a JSON file or imported from a JSON file by pressing "Export" or "Import" buttons at the toolbar. For this example the exported file would contain:
+```json
+{
+  "Excitation energy [eV]": 12500,
+  "Detectors": {
+    "SDD1": {
+      "Zero [eV]": -647.684,
+      "Gain [eV/channel]": 6.953,
+      "Noise [eV]": 140,
+      "Fano [-]": 0.006,
+      "Epsilon [eV]": 3.85,
+      "N [-]": 4096
+    },
+    "SDD2": {
+      "Zero [eV]": -647.684,
+      "Gain [eV/channel]": 6.953,
+      "Noise [eV]": 140,
+      "Fano [-]": 0.006,
+      "Epsilon [eV]": 3.85,
+      "N [-]": 4096
+    }
+  },
+  "ROIsTable": {
+    "Cr_Kα": {
+      "Min energy [eV]": "5339",
+      "Max energy [eV]": "5483",
+      "SDD1 Min channel": "861",
+      "SDD1 Max channel": "882",
+      "SDD2 Min channel": "861",
+      "SDD2 Max channel": "882"
+    },
+    "Au_Lα": {
+      "Min energy [eV]": "9631",
+      "Max energy [eV]": "9777",
+      "SDD1 Min channel": "1478",
+      "SDD1 Max channel": "1499",
+      "SDD2 Min channel": "1478",
+      "SDD2 Max channel": "1499"
+    },
+    "ExampleROI": {
+      "Min energy [eV]": "4928",
+      "Max energy [eV]": "5071",
+      "SDD1 Min channel": "802",
+      "SDD1 Max channel": "823",
+      "SDD2 Min channel": "802",
+      "SDD2 Max channel": "823"
+    },
+    "ExampleROI_1": {
+      "Min energy [eV]": "2000",
+      "Max energy [eV]": "6000",
+      "SDD1 Min channel": "381",
+      "SDD1 Max channel": "956",
+      "SDD2 Min channel": "381",
+      "SDD2 Max channel": "956"
+    }
+  }
+}
+```
 
 Additionally, the application can be reseted to the default values and properties by pressing "Reset" button at the toolbar. 
+
+## Default values and calculations
+
+Default detectors properties are presented in a table below:
+
+Name|Zero [eV]|Gain [eV/channel]|Noise [eV]|Fano [-]|Epsilon [eV]|N [-]
+---|---:|---:|---:|---:|---:|---: 
+SDD1|-647.684|6.953|140|0.006|3.85|4096
+SDD2|-647.684|6.953|140|0.006|3.85|4096
+
+Energy line $$E$$ for specified $$\text{channel}$$ is calculated by
+
+$$E=\text{zero}+\text{gain}\cdot\text{channel}$$,
+
+and standard deviation for energy line $$E$$ (characteristic or manually specified energy line, or calculated by equation above) is calculated by
+
+$$\sigma=\sqrt{\text{noise}^2\cdot\text{epsilon}\cdot\text{fano}\cdot E}$$,
+
+where $$\text{zero}, \text{gain}, \text{noise}, \text{fano}$$, and $$\text{epsilon}$$ are properties defined for every detector.
