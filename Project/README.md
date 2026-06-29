@@ -1,5 +1,5 @@
 
-# ![appIcon]("Project/icon.png") XRF Spectra ROI Definer
+# ![appIcon]("icon.png") XRF Spectra ROI Definer
 
 ![MIT License](https://img.shields.io/badge/License-MIT-green.svg)
 
@@ -17,8 +17,7 @@ for X-ray Fluorescence spectra analysis.
 
 ## Usage
 
-```bash
-
+```console
 usage: python main.py [-h] [-e ENERGY] [-r {vars,json}]
 options:
   -h, --help            show this help message and exit
