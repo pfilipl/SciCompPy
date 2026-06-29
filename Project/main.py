@@ -554,23 +554,24 @@ def main():
     """
 
     parser = ArgumentParser(
-        prog="XRF Spectra ROI Definer",
+        prog="python main.py",
         description="""
         SciCompPy project application for defining energetic regions of interest (ROIs) 
         for X-ray Fluorescence spectra analysis.
         """,
     )
-    parser.add_argument("-e", "--energy", required=False, help="excitation energy [eV]")
+    parser.add_argument("-e", "--energy", required=False, help="define excitation energy in eV")
     parser.add_argument(
         "-r",
         "--returning",
         required=False,
         choices=["vars", "json"],
-        help="returning data do console: 'vars' for variables, 'json' for JSON string",
+        help="set returning data to console: 'vars' for variables, 'json' for JSON string",
     )
     args = parser.parse_args()
 
     app = QtWidgets.QApplication(sys.argv)
+    app.setWindowIcon(QtGui.QIcon("Project/icon.png"))
     window = MainWindow(args)
     window.show()
     sys.exit(app.exec())

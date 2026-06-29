@@ -1,5 +1,5 @@
 
-# XRF Spectra ROI Definer
+# ![appIcon]("Project/icon.png") XRF Spectra ROI Definer
 
 ![MIT License](https://img.shields.io/badge/License-MIT-green.svg)
 
@@ -19,6 +19,10 @@ for X-ray Fluorescence spectra analysis.
 
 ```bash
 
-python main.py [-h] [-e ENERGY] [-r {vars,json}]
+usage: python main.py [-h] [-e ENERGY] [-r {vars,json}]
+options:
+  -h, --help            show this help message and exit
+  -e, --energy ENERGY   define excitation energy in eV
+  -r, --returning {vars,json}
+                        set returning data to console: 'vars' for variables, 'json' for JSON string
 ```
-
